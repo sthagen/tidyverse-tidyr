@@ -1,16 +1,16 @@
 #' Drop rows containing missing values
 #'
 #' @param data A data frame.
-#' @inheritSection gather Rules for selection
-#' @inheritParams gather
+#' @param ... <[`tidy-select`][tidyr_tidy_select]> Columns to inspect for
+#'   missing values.
 #' @examples
 #' library(dplyr)
 #' df <- tibble(x = c(1, 2, NA), y = c("a", NA, "b"))
 #' df %>% drop_na()
 #' df %>% drop_na(x)
-#' # using a contextual object with all_of()
-#' z <- 2
-#' df %>% drop_na(x, all_of(z))
+#'
+#' vars <- "y"
+#' df %>% drop_na(x, any_of(vars))
 #' @export
 drop_na <- function(data, ...) {
   ellipsis::check_dots_unnamed()
@@ -18,14 +18,14 @@ drop_na <- function(data, ...) {
 }
 #' @export
 drop_na.data.frame <- function(data, ...) {
-  vars <- unname(tidyselect::vars_select(tbl_vars(data), ...))
+  vars <- tidyselect::eval_select(expr(c(...)), data)
 
   if (is_empty(vars)) {
     f <- complete_cases(data)
   } else {
     f <- complete_cases(data[vars])
   }
-  out <- data[f, , drop = FALSE]
+  out <- vec_slice(data, f)
 
   reconstruct_tibble(data, out)
 }

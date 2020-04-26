@@ -18,17 +18,15 @@
 #' @seealso [pivot_wider_spec()] to pivot "by hand" with a data frame that
 #'   defines a pivotting specification.
 #' @inheritParams pivot_longer
-#' @param id_cols A set of columns that uniquely identifies each observation.
-#'   Defaults to all columns in `data` except for the columns specified in
-#'   `names_from` and `values_from`. Typically used when you have additional
-#'   variables that is directly related.
-#'
-#'   This takes a tidyselect specification, e.g. use `a:c` to select all
-#'   columns from `a` to `c`, `starts_with("prefix")` to select all columns
-#'   starting with "prefix", or `everything()` to select all columns.
-#' @param names_from,values_from A pair of arguments describing which column
-#'   (or columns) to get the name of the output column (`name_from`), and
-#'   which column (or columns) to get the cell values from (`values_from`).
+#' @param id_cols <[`tidy-select`][tidyr_tidy_select]> A set of columns that
+#'   uniquely identifies each observation. Defaults to all columns in `data`
+#'   except for the columns specified in `names_from` and `values_from`.
+#'   Typically used when you have additional variables that are directly
+#'   related.
+#' @param names_from,values_from <[`tidy-select`][tidyr_tidy_select]> A pair of
+#'   arguments describing which column (or columns) to get the name of the
+#'   output column (`name_from`), and which column (or columns) to get the
+#'   cell values from (`values_from`).
 #'
 #'   If `values_from` contains multiple values, the value will be added to the
 #'   front of the output column.
@@ -38,6 +36,9 @@
 #' @param names_prefix String added to the start of every variable name. This is
 #'   particularly useful if `names_from` is a numeric vector and you want to
 #'   create syntactic variable names.
+#' @param names_glue Instead of `names_sep` and `names_prefix`, you can supply
+#'   a glue specification that uses the `names_from` columns (and special
+#'   `.value`) to create custom column names.
 #' @param values_fill Optionally, a value that specifies what each `value`
 #'   should be filled in with when missing.
 #'
@@ -65,6 +66,21 @@
 #' us_rent_income %>%
 #'   pivot_wider(names_from = variable, values_from = c(estimate, moe))
 #'
+#' # When there are multiple `names_from` or `values_from`, you can use
+#' # use `names_sep` or `names_glue` to control the output variable names
+#' us_rent_income %>%
+#'   pivot_wider(
+#'     names_from = variable,
+#'     names_sep = ".",
+#'     values_from = c(estimate, moe)
+#'   )
+#' us_rent_income %>%
+#'   pivot_wider(
+#'     names_from = variable,
+#'     names_glue = "{variable}_{.value}",
+#'     values_from = c(estimate, moe)
+#'   )
+#'
 #' # Can perform aggregation with values_fn
 #' warpbreaks <- as_tibble(warpbreaks[c("wool", "tension", "breaks")])
 #' warpbreaks
@@ -79,6 +95,7 @@ pivot_wider <- function(data,
                         names_from = name,
                         names_prefix = "",
                         names_sep = "_",
+                        names_glue = NULL,
                         names_repair = "check_unique",
                         values_from = value,
                         values_fill = NULL,
@@ -90,7 +107,8 @@ pivot_wider <- function(data,
     names_from = !!names_from,
     values_from = !!values_from,
     names_prefix = names_prefix,
-    names_sep = names_sep
+    names_sep = names_sep,
+    names_glue = names_glue
   )
 
   id_cols <- enquo(id_cols)
@@ -167,7 +185,7 @@ pivot_wider_spec <- function(data,
 
   id_cols <- enquo(id_cols)
   if (!quo_is_null(id_cols)) {
-    key_vars <- tidyselect::vars_select(tbl_vars(data), !!id_cols)
+    key_vars <- names(tidyselect::eval_select(enquo(id_cols), data))
   } else {
     key_vars <- tbl_vars(data)
   }
@@ -240,9 +258,10 @@ build_wider_spec <- function(data,
                              names_from = name,
                              values_from = value,
                              names_prefix = "",
-                             names_sep = "_") {
-  names_from <- tidyselect::vars_select(tbl_vars(data), !!enquo(names_from))
-  values_from <- tidyselect::vars_select(tbl_vars(data), !!enquo(values_from))
+                             names_sep = "_",
+                             names_glue = NULL) {
+  names_from <- tidyselect::eval_select(enquo(names_from), data)
+  values_from <- tidyselect::eval_select(enquo(values_from), data)
 
   row_ids <- vec_unique(data[names_from])
   row_names <- exec(paste, !!!row_ids, sep = names_sep)
@@ -252,16 +271,21 @@ build_wider_spec <- function(data,
   )
 
   if (length(values_from) == 1) {
-    out$.value <- values_from
+    out$.value <- names(values_from)
   } else {
     out <- vec_repeat(out, times = vec_size(values_from))
-    out$.value <- vec_repeat(values_from, each = vec_size(row_ids))
+    out$.value <- vec_repeat(names(values_from), each = vec_size(row_ids))
     out$.name <- paste0(out$.value, names_sep, out$.name)
 
     row_ids <- vec_repeat(row_ids, times = vec_size(values_from))
   }
 
-  vec_cbind(out, as_tibble(row_ids), .name_repair = "minimal")
+  out <- vec_cbind(out, as_tibble(row_ids), .name_repair = "minimal")
+  if (!is.null(names_glue)) {
+    out$.name <- as.character(glue::glue_data(out, names_glue))
+  }
+
+  out
 }
 
 # quiet R CMD check
@@ -299,7 +323,7 @@ vals_dedup <- function(key, val, value, summarize = NULL) {
 # Wrap a "rectangular" vector into a data frame
 wrap_vec <- function(vec, names) {
   ncol <- length(names)
-  nrow <- length(vec) / ncol
+  nrow <- vec_size(vec) / ncol
   out <- set_names(vec_init(list(), ncol), names)
   for (i in 1:ncol) {
     out[[i]] <- vec_slice(vec, ((i - 1) * nrow + 1):(i * nrow))

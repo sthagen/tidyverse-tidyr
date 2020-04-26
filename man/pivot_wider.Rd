@@ -10,6 +10,7 @@ pivot_wider(
   names_from = name,
   names_prefix = "",
   names_sep = "_",
+  names_glue = NULL,
   names_repair = "check_unique",
   values_from = value,
   values_fill = NULL,
@@ -19,18 +20,16 @@ pivot_wider(
 \arguments{
 \item{data}{A data frame to pivot.}
 
-\item{id_cols}{A set of columns that uniquely identifies each observation.
-Defaults to all columns in \code{data} except for the columns specified in
-\code{names_from} and \code{values_from}. Typically used when you have additional
-variables that is directly related.
+\item{id_cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A set of columns that
+uniquely identifies each observation. Defaults to all columns in \code{data}
+except for the columns specified in \code{names_from} and \code{values_from}.
+Typically used when you have additional variables that are directly
+related.}
 
-This takes a tidyselect specification, e.g. use \code{a:c} to select all
-columns from \code{a} to \code{c}, \code{starts_with("prefix")} to select all columns
-starting with "prefix", or \code{everything()} to select all columns.}
-
-\item{names_from, values_from}{A pair of arguments describing which column
-(or columns) to get the name of the output column (\code{name_from}), and
-which column (or columns) to get the cell values from (\code{values_from}).
+\item{names_from, values_from}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A pair of
+arguments describing which column (or columns) to get the name of the
+output column (\code{name_from}), and which column (or columns) to get the
+cell values from (\code{values_from}).
 
 If \code{values_from} contains multiple values, the value will be added to the
 front of the output column.}
@@ -42,6 +41,10 @@ create syntactic variable names.}
 \item{names_sep}{If \code{names_from} or \code{values_from} contains multiple
 variables, this will be used to join their values together into a single
 string to use as a column name.}
+
+\item{names_glue}{Instead of \code{names_sep} and \code{names_prefix}, you can supply
+a glue specification that uses the \code{names_from} columns (and special
+\code{.value}) to create custom column names.}
 
 \item{names_repair}{What happens if the output has invalid column names?
 The default, \code{"check_unique"} is to error if the columns are duplicated.
@@ -91,6 +94,21 @@ fish_encounters \%>\%
 us_rent_income
 us_rent_income \%>\%
   pivot_wider(names_from = variable, values_from = c(estimate, moe))
+
+# When there are multiple `names_from` or `values_from`, you can use
+# use `names_sep` or `names_glue` to control the output variable names
+us_rent_income \%>\%
+  pivot_wider(
+    names_from = variable,
+    names_sep = ".",
+    values_from = c(estimate, moe)
+  )
+us_rent_income \%>\%
+  pivot_wider(
+    names_from = variable,
+    names_glue = "{variable}_{.value}",
+    values_from = c(estimate, moe)
+  )
 
 # Can perform aggregation with values_fn
 warpbreaks <- as_tibble(warpbreaks[c("wool", "tension", "breaks")])

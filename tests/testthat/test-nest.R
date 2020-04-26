@@ -12,7 +12,7 @@ test_that("nest turns grouped values into one list-df", {
 
 test_that("nest uses grouping vars if present", {
   df <- tibble(x = c(1, 1, 1), y = 1:3)
-  out <- df %>% dplyr::group_by(x) %>% nest()
+  out <- nest(dplyr::group_by(df, x))
   expect_s3_class(out, "grouped_df")
   expect_equal(out$data[[1]], tibble(y = 1:3))
 })
@@ -195,15 +195,36 @@ test_that("vectors become columns", {
 
 test_that("multiple columns must be same length", {
   df <- tibble(x = list(1:2), y = list(1:3))
-  expect_error(unnest(df, c(x, y)), class = "vctrs_error_incompatible_size")
+  expect_error(unnest(df, c(x, y)), "Incompatible lengths: 2, 3")
 
   df <- tibble(x = list(1:2), y = list(tibble(y = 1:3)))
-  expect_error(unnest(df, c(x, y)), class = "vctrs_error_incompatible_size")
+  expect_error(unnest(df, c(x, y)), "Incompatible lengths: 2, 3")
 })
 
 test_that("can use non-syntactic names", {
   out <- tibble("foo bar" = list(1:2, 3)) %>% unnest(`foo bar`)
   expect_named(out, "foo bar")
+})
+
+
+# other methods -----------------------------------------------------------------
+
+test_that("rowwise_df becomes grouped_df", {
+  skip_if_not_installed("dplyr", "0.8.99")
+
+  df <- tibble(g = 1, x = list(1:3)) %>% dplyr::rowwise(g)
+  rs <- df %>% unnest(x)
+
+  expect_s3_class(rs, "grouped_df")
+  expect_equal(dplyr::group_vars(rs), "g")
+})
+
+test_that("grouping is preserved", {
+  df <- tibble(g = 1, x = list(1:3)) %>% dplyr::group_by(g)
+  rs <- df %>% unnest(x)
+
+  expect_s3_class(rs, "grouped_df")
+  expect_equal(dplyr::group_vars(rs), "g")
 })
 
 # Empty inputs ------------------------------------------------------------
@@ -293,13 +314,4 @@ test_that(".id creates vector of names for vector unnest", {
   out <- expect_warning(unnest(df, y, .id = "name"), "names")
 
   expect_equal(out$name, c("a", "b", "b"))
-})
-
-test_that("grouping is preserved", {
-  df <- tibble(g = 1, x = list(1:3)) %>% dplyr::group_by(g)
-  rs <- df %>% unnest(x)
-
-  expect_equal(rs$x, 1:3)
-  expect_equal(class(df), class(rs))
-  expect_equal(dplyr::group_vars(df), dplyr::group_vars(rs))
 })

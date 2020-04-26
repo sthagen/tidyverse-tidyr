@@ -23,20 +23,20 @@
 #' ```
 #'
 #' @section Grouped data frames:
-#' `df %>% nest(x, y)` specifies the columns to be nested; i.e. the columns that
-#' will appear in the inner data frame. Alternatively, you can `nest()` a
-#' grouped data frame created by [dplyr::group_by()]. The grouping variables
-#' remain in the outer data frame and the others are nested. The result
-#' preserves the grouping of the input.
+#' `df %>% nest(data = c(x, y))` specifies the columns to be nested; i.e. the
+#' columns that will appear in the inner data frame. Alternatively, you can
+#' `nest()` a grouped data frame created by [dplyr::group_by()]. The grouping
+#' variables remain in the outer data frame and the others are nested. The
+#' result preserves the grouping of the input.
 #'
 #' Variables supplied to `nest()` will override grouping variables so that
-#' `df %>% group_by(x, y) %>% nest(z)` will be equivalent to `df %>% nest(z)`.
+#' `df %>% group_by(x, y) %>% nest(data = -z)` will be equivalent to
+#' `df %>% nest(data = -z)`.
 #'
 #' @param .data A data frame.
-#' @param ... Name-variable pairs of the form `new_col = c(col1, col2, col3)`,
-#'   that describe how you wish to nest existing columns into new columns.
-#'   The right hand side can be any expression supported by tidyselect.
-#'
+#' @param ... <[`tidy-select`][tidyr_tidy_select]> Columns to nest, specified
+#'   using name-variable pairs of the form `new_col = c(col1, col2, col3)`.
+#'   The right hand side can be any valid tidy select expression.
 #'
 #'   \Sexpr[results=rd, stage=render]{lifecycle::badge("deprecated")}:
 #'   previously you could write `df %>% nest(x, y, z)` and `df %>%
@@ -122,7 +122,7 @@ nest <- function(.data, ..., .names_sep = NULL, .key = deprecated()) {
   cols <- enquos(...)
 
   if (any(names2(cols) == "")) {
-    col_names <- unname(tidyselect::vars_select(tbl_vars(.data), !!!cols))
+    col_names <- names(tidyselect::eval_select(expr(c(...)), .data))
     cols_expr <- expr(c(!!!syms(col_names)))
     .key <- if (missing(.key)) "data" else as.character(ensym(.key))
     cols <- quos(!!.key := !!cols_expr)
@@ -160,7 +160,7 @@ nest.tbl_df <- function(.data, ..., .names_sep = NULL, .key = deprecated()) {
     cols <- list2(!!.key := names(.data))
   } else {
     cols <- enquos(...)
-    cols <- map(cols, ~ tidyselect::vars_select(tbl_vars(.data), !!.x))
+    cols <- map(cols, ~ names(tidyselect::eval_select(.x, .data)))
   }
 
   cols <- map(cols, set_names)
@@ -182,7 +182,7 @@ nest.grouped_df <- function(.data, ..., .names_sep = NULL, .key = deprecated()) 
   if (missing(...)) {
     .key <- check_key(.key)
     nest_vars <- setdiff(names(.data), dplyr::group_vars(.data))
-    out <- nest.tbl_df(.data, !!.key := !!nest_vars, .names_sep = .names_sep)
+    out <- nest.tbl_df(.data, !!.key := any_of(nest_vars), .names_sep = .names_sep)
   } else {
     out <- NextMethod()
   }
@@ -204,7 +204,7 @@ check_key <- function(.key) {
 
 #' @inheritParams unchop
 #' @inheritParams unpack
-#' @param cols Names of columns to unnest.
+#' @param cols <[`tidy-select`][tidyr_tidy_select]> Columns to unnest.
 #'
 #'   If you `unnest()` multiple columns, parallel entries must be of
 #'   compatible sizes, i.e. they're either equal or length 1 (following the
@@ -323,22 +323,46 @@ unnest.data.frame <- function(
                               .sep = "DEPRECATED",
                               .preserve = "DEPRECATED") {
 
-  cols <- tidyselect::vars_select(tbl_vars(data), !!enquo(cols))
+  cols <- tidyselect::eval_select(enquo(cols), data)
 
   if (nrow(data) == 0) {
-    for (col in cols) {
+    for (col in names(cols)) {
       data[[col]] <- as_empty_df(data[[col]], col = col)
     }
   } else {
-    for (col in cols) {
+    for (col in names(cols)) {
       data[[col]] <- map(data[[col]], as_df, col = col)
     }
   }
 
-  data <- unchop(data, !!cols, keep_empty = keep_empty, ptype = ptype)
-  unpack(data, !!cols, names_sep = names_sep, names_repair = names_repair)
+  data <- unchop(data, any_of(cols), keep_empty = keep_empty, ptype = ptype)
+  unpack(data, any_of(cols), names_sep = names_sep, names_repair = names_repair)
 }
 
+
+#' @export
+unnest.rowwise_df <- function(
+                              data,
+                              cols,
+                              ...,
+                              keep_empty = FALSE,
+                              ptype = NULL,
+                              names_sep = NULL,
+                              names_repair = "check_unique"
+                              ) {
+
+  out <- unnest.data.frame(as_tibble(data), {{ cols }},
+    keep_empty = keep_empty,
+    ptype = ptype,
+    names_sep = names_sep,
+    names_repair = names_repair
+  )
+  if (packageVersion("dplyr") > "0.8.99") {
+    out <- dplyr::grouped_df(out, dplyr::group_vars(data))
+  }
+
+  out
+}
 
 # helpers -----------------------------------------------------------------
 

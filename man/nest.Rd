@@ -24,9 +24,9 @@ unnest(
 \arguments{
 \item{.data}{A data frame.}
 
-\item{...}{Name-variable pairs of the form \code{new_col = c(col1, col2, col3)},
-that describe how you wish to nest existing columns into new columns.
-The right hand side can be any expression supported by tidyselect.
+\item{...}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Columns to nest, specified
+using name-variable pairs of the form \code{new_col = c(col1, col2, col3)}.
+The right hand side can be any valid tidy select expression.
 
 \Sexpr[results=rd, stage=render]{lifecycle::badge("deprecated")}:
 previously you could write \code{df \%>\% nest(x, y, z)} and \code{df \%>\% unnest(x, y, z)}. Convert to \code{df \%>\% nest(data = c(x, y, z))}.
@@ -41,7 +41,7 @@ No longer needed because of the new \code{new_col = c(col1, col2, col3)} syntax.
 
 \item{data}{A data frame.}
 
-\item{cols}{Names of columns to unnest.
+\item{cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Columns to unnest.
 
 If you \code{unnest()} multiple columns, parallel entries must be of
 compatible sizes, i.e. they're either equal or length 1 (following the
@@ -118,14 +118,15 @@ unnest <- unnest_legacy
 
 \section{Grouped data frames}{
 
-\code{df \%>\% nest(x, y)} specifies the columns to be nested; i.e. the columns that
-will appear in the inner data frame. Alternatively, you can \code{nest()} a
-grouped data frame created by \code{\link[dplyr:group_by]{dplyr::group_by()}}. The grouping variables
-remain in the outer data frame and the others are nested. The result
-preserves the grouping of the input.
+\code{df \%>\% nest(data = c(x, y))} specifies the columns to be nested; i.e. the
+columns that will appear in the inner data frame. Alternatively, you can
+\code{nest()} a grouped data frame created by \code{\link[dplyr:group_by]{dplyr::group_by()}}. The grouping
+variables remain in the outer data frame and the others are nested. The
+result preserves the grouping of the input.
 
 Variables supplied to \code{nest()} will override grouping variables so that
-\code{df \%>\% group_by(x, y) \%>\% nest(z)} will be equivalent to \code{df \%>\% nest(z)}.
+\code{df \%>\% group_by(x, y) \%>\% nest(data = -z)} will be equivalent to
+\code{df \%>\% nest(data = -z)}.
 }
 
 \examples{
