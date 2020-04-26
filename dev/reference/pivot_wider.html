@@ -17,22 +17,26 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 
 <!-- Bootstrap -->
 <link href="../tidyverse.css" rel="stylesheet">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -89,7 +93,7 @@ Learn more in vignette(&quot;pivot&quot;)." />
 
       <div class="navbar-brand-container">
         <a class="navbar-brand" href="../index.html">tidyr</a>
-        <div class="info">
+        <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
           <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
         </div>
@@ -118,6 +122,9 @@ Learn more in vignette(&quot;pivot&quot;)." />
     </li>
     <li>
       <a href="../articles/pivot.html">Pivoting</a>
+    </li>
+    <li>
+      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
@@ -206,6 +213,7 @@ decreasing the number of rows. The inverse transformation is
   <span class='kw'>names_from</span> <span class='kw'>=</span> <span class='no'>name</span>,
   <span class='kw'>names_prefix</span> <span class='kw'>=</span> <span class='st'>""</span>,
   <span class='kw'>names_sep</span> <span class='kw'>=</span> <span class='st'>"_"</span>,
+  <span class='kw'>names_glue</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>names_repair</span> <span class='kw'>=</span> <span class='st'>"check_unique"</span>,
   <span class='kw'>values_from</span> <span class='kw'>=</span> <span class='no'>value</span>,
   <span class='kw'>values_fill</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -221,19 +229,18 @@ decreasing the number of rows. The inverse transformation is
     </tr>
     <tr>
       <th>id_cols</th>
-      <td><p>A set of columns that uniquely identifies each observation.
-Defaults to all columns in <code>data</code> except for the columns specified in
-<code>names_from</code> and <code>values_from</code>. Typically used when you have additional
-variables that is directly related.</p>
-<p>This takes a tidyselect specification, e.g. use <code>a:c</code> to select all
-columns from <code>a</code> to <code>c</code>, <code><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>starts_with("prefix")</a></code> to select all columns
-starting with "prefix", or <code><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>everything()</a></code> to select all columns.</p></td>
+      <td><p>&lt;<code><a href='tidyr_tidy_select.html'>tidy-select</a></code>&gt; A set of columns that
+uniquely identifies each observation. Defaults to all columns in <code>data</code>
+except for the columns specified in <code>names_from</code> and <code>values_from</code>.
+Typically used when you have additional variables that are directly
+related.</p></td>
     </tr>
     <tr>
       <th>names_from, values_from</th>
-      <td><p>A pair of arguments describing which column
-(or columns) to get the name of the output column (<code>name_from</code>), and
-which column (or columns) to get the cell values from (<code>values_from</code>).</p>
+      <td><p>&lt;<code><a href='tidyr_tidy_select.html'>tidy-select</a></code>&gt; A pair of
+arguments describing which column (or columns) to get the name of the
+output column (<code>name_from</code>), and which column (or columns) to get the
+cell values from (<code>values_from</code>).</p>
 <p>If <code>values_from</code> contains multiple values, the value will be added to the
 front of the output column.</p></td>
     </tr>
@@ -248,6 +255,12 @@ create syntactic variable names.</p></td>
       <td><p>If <code>names_from</code> or <code>values_from</code> contains multiple
 variables, this will be used to join their values together into a single
 string to use as a column name.</p></td>
+    </tr>
+    <tr>
+      <th>names_glue</th>
+      <td><p>Instead of <code>names_sep</code> and <code>names_prefix</code>, you can supply
+a glue specification that uses the <code>names_from</code> columns (and special
+<code>.value</code>) to create custom column names.</p></td>
     </tr>
     <tr>
       <th>names_repair</th>
@@ -364,6 +377,45 @@ defines a pivotting specification.</p></div>
 #&gt; </span><span style='color: #555555;'># … with 94 more rows</span><span></div><div class='input'><span class='no'>us_rent_income</span> <span class='kw'>%&gt;%</span>
   <span class='fu'>pivot_wider</span>(<span class='kw'>names_from</span> <span class='kw'>=</span> <span class='no'>variable</span>, <span class='kw'>values_from</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>estimate</span>, <span class='no'>moe</span>))</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 52 x 6</span><span>
 #&gt;    GEOID NAME                 estimate_income estimate_rent moe_income moe_rent
+#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'> 1</span><span> 01    Alabama                        </span><span style='text-decoration: underline;'>24</span><span>476           747        136        3
+#&gt; </span><span style='color: #555555;'> 2</span><span> 02    Alaska                         </span><span style='text-decoration: underline;'>32</span><span>940          </span><span style='text-decoration: underline;'>1</span><span>200        508       13
+#&gt; </span><span style='color: #555555;'> 3</span><span> 04    Arizona                        </span><span style='text-decoration: underline;'>27</span><span>517           972        148        4
+#&gt; </span><span style='color: #555555;'> 4</span><span> 05    Arkansas                       </span><span style='text-decoration: underline;'>23</span><span>789           709        165        5
+#&gt; </span><span style='color: #555555;'> 5</span><span> 06    California                     </span><span style='text-decoration: underline;'>29</span><span>454          </span><span style='text-decoration: underline;'>1</span><span>358        109        3
+#&gt; </span><span style='color: #555555;'> 6</span><span> 08    Colorado                       </span><span style='text-decoration: underline;'>32</span><span>401          </span><span style='text-decoration: underline;'>1</span><span>125        109        5
+#&gt; </span><span style='color: #555555;'> 7</span><span> 09    Connecticut                    </span><span style='text-decoration: underline;'>35</span><span>326          </span><span style='text-decoration: underline;'>1</span><span>123        195        5
+#&gt; </span><span style='color: #555555;'> 8</span><span> 10    Delaware                       </span><span style='text-decoration: underline;'>31</span><span>560          </span><span style='text-decoration: underline;'>1</span><span>076        247       10
+#&gt; </span><span style='color: #555555;'> 9</span><span> 11    District of Columbia           </span><span style='text-decoration: underline;'>43</span><span>198          </span><span style='text-decoration: underline;'>1</span><span>424        681       17
+#&gt; </span><span style='color: #555555;'>10</span><span> 12    Florida                        </span><span style='text-decoration: underline;'>25</span><span>952          </span><span style='text-decoration: underline;'>1</span><span>077         70        3
+#&gt; </span><span style='color: #555555;'># … with 42 more rows</span><span></div><div class='input'>
+<span class='co'># When there are multiple `names_from` or `values_from`, you can use</span>
+<span class='co'># use `names_sep` or `names_glue` to control the output variable names</span>
+<span class='no'>us_rent_income</span> <span class='kw'>%&gt;%</span>
+  <span class='fu'>pivot_wider</span>(
+    <span class='kw'>names_from</span> <span class='kw'>=</span> <span class='no'>variable</span>,
+    <span class='kw'>names_sep</span> <span class='kw'>=</span> <span class='st'>"."</span>,
+    <span class='kw'>values_from</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>estimate</span>, <span class='no'>moe</span>)
+  )</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 52 x 6</span><span>
+#&gt;    GEOID NAME                 estimate.income estimate.rent moe.income moe.rent
+#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'> 1</span><span> 01    Alabama                        </span><span style='text-decoration: underline;'>24</span><span>476           747        136        3
+#&gt; </span><span style='color: #555555;'> 2</span><span> 02    Alaska                         </span><span style='text-decoration: underline;'>32</span><span>940          </span><span style='text-decoration: underline;'>1</span><span>200        508       13
+#&gt; </span><span style='color: #555555;'> 3</span><span> 04    Arizona                        </span><span style='text-decoration: underline;'>27</span><span>517           972        148        4
+#&gt; </span><span style='color: #555555;'> 4</span><span> 05    Arkansas                       </span><span style='text-decoration: underline;'>23</span><span>789           709        165        5
+#&gt; </span><span style='color: #555555;'> 5</span><span> 06    California                     </span><span style='text-decoration: underline;'>29</span><span>454          </span><span style='text-decoration: underline;'>1</span><span>358        109        3
+#&gt; </span><span style='color: #555555;'> 6</span><span> 08    Colorado                       </span><span style='text-decoration: underline;'>32</span><span>401          </span><span style='text-decoration: underline;'>1</span><span>125        109        5
+#&gt; </span><span style='color: #555555;'> 7</span><span> 09    Connecticut                    </span><span style='text-decoration: underline;'>35</span><span>326          </span><span style='text-decoration: underline;'>1</span><span>123        195        5
+#&gt; </span><span style='color: #555555;'> 8</span><span> 10    Delaware                       </span><span style='text-decoration: underline;'>31</span><span>560          </span><span style='text-decoration: underline;'>1</span><span>076        247       10
+#&gt; </span><span style='color: #555555;'> 9</span><span> 11    District of Columbia           </span><span style='text-decoration: underline;'>43</span><span>198          </span><span style='text-decoration: underline;'>1</span><span>424        681       17
+#&gt; </span><span style='color: #555555;'>10</span><span> 12    Florida                        </span><span style='text-decoration: underline;'>25</span><span>952          </span><span style='text-decoration: underline;'>1</span><span>077         70        3
+#&gt; </span><span style='color: #555555;'># … with 42 more rows</span><span></div><div class='input'><span class='no'>us_rent_income</span> <span class='kw'>%&gt;%</span>
+  <span class='fu'>pivot_wider</span>(
+    <span class='kw'>names_from</span> <span class='kw'>=</span> <span class='no'>variable</span>,
+    <span class='kw'>names_glue</span> <span class='kw'>=</span> <span class='st'>"{variable}_{.value}"</span>,
+    <span class='kw'>values_from</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>estimate</span>, <span class='no'>moe</span>)
+  )</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 52 x 6</span><span>
+#&gt;    GEOID NAME                 income_estimate rent_estimate income_moe rent_moe
 #&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
 #&gt; </span><span style='color: #555555;'> 1</span><span> 01    Alabama                        </span><span style='text-decoration: underline;'>24</span><span>476           747        136        3
 #&gt; </span><span style='color: #555555;'> 2</span><span> 02    Alaska                         </span><span style='text-decoration: underline;'>32</span><span>940          </span><span style='text-decoration: underline;'>1</span><span>200        508       13

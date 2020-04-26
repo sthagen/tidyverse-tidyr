@@ -6,8 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extract a character column into multiple columns using regular
-expression groups — extract • tidyr</title>
+<title>Argument type: tidy-select — tidyr_tidy_select • tidyr</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,11 +45,11 @@ expression groups — extract • tidyr</title>
 
 
 
-<meta property="og:title" content="Extract a character column into multiple columns using regular
-expression groups — extract" />
-<meta property="og:description" content="Given a regular expression with capturing groups, extract() turns
-each group into a new column. If the groups don't match, or the input
-is NA, the output will be NA." />
+<meta property="og:title" content="Argument type: tidy-select — tidyr_tidy_select" />
+<meta property="og:description" content="This page the describes the &amp;lt;tidy-select&amp;gt; argument modifier which indicates
+the argument uses tidy selection (a special type of tidy evaluation).
+Tidy selection provides a concise DSL for selecting variables based on their
+names." />
 <meta property="og:image" content="https://tidyr.tidyverse.org/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -194,94 +193,57 @@ is NA, the output will be NA." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extract a character column into multiple columns using regular
-expression groups</h1>
-    <small class="dont-index">Source: <a href='https://github.com/tidyverse/tidyr/blob/master/R/extract.R'><code>R/extract.R</code></a></small>
-    <div class="hidden name"><code>extract.Rd</code></div>
+    <h1>Argument type: tidy-select</h1>
+    <small class="dont-index">Source: <a href='https://github.com/tidyverse/tidyr/blob/master/R/doc-params.R'><code>R/doc-params.R</code></a></small>
+    <div class="hidden name"><code>tidyr_tidy_select.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given a regular expression with capturing groups, <code>extract()</code> turns
-each group into a new column. If the groups don't match, or the input
-is NA, the output will be NA.</p>
+    <p>This page the describes the <code>&lt;tidy-select&gt;</code> argument modifier which indicates
+the argument uses <strong>tidy selection</strong> (a special type of tidy evaluation).
+Tidy selection provides a concise DSL for selecting variables based on their
+names.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>extract</span>(
-  <span class='no'>data</span>,
-  <span class='no'>col</span>,
-  <span class='no'>into</span>,
-  <span class='kw'>regex</span> <span class='kw'>=</span> <span class='st'>"([[:alnum:]]+)"</span>,
-  <span class='kw'>remove</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>convert</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>...</span>
-)</pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>data</th>
-      <td><p>A data frame.</p></td>
-    </tr>
-    <tr>
-      <th>col</th>
-      <td><p>Column name or position. This is passed to
-<code><a href='https://tidyselect.r-lib.org/reference/vars_pull.html'>tidyselect::vars_pull()</a></code>.</p>
-<p>This argument is passed by expression and supports
-<a href='https://rlang.r-lib.org/reference/nse-force.html'>quasiquotation</a> (you can unquote column
-names or column positions).</p></td>
-    </tr>
-    <tr>
-      <th>into</th>
-      <td><p>Names of new variables to create as character vector.
-Use <code>NA</code> to omit the variable in the output.</p></td>
-    </tr>
-    <tr>
-      <th>regex</th>
-      <td><p>a regular expression used to extract the desired values.
-There should be one group (defined by <code>()</code>) for each element of <code>into</code>.</p></td>
-    </tr>
-    <tr>
-      <th>remove</th>
-      <td><p>If <code>TRUE</code>, remove input column from output data frame.</p></td>
-    </tr>
-    <tr>
-      <th>convert</th>
-      <td><p>If <code>TRUE</code>, will run <code><a href='https://rdrr.io/r/utils/type.convert.html'>type.convert()</a></code> with
-<code>as.is = TRUE</code> on new columns. This is useful if the component
-columns are integer, numeric or logical.</p>
-<p>NB: this will cause string <code>"NA"</code>s to be converted to <code>NA</code>s.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Additional arguments passed on to methods.</p></td>
-    </tr>
-    </table>
 
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <h2 class="hasAnchor" id="general-usage"><a class="anchor" href="#general-usage"></a>General usage</h2>
 
-    <div class='dont-index'><p><code><a href='separate.html'>separate()</a></code> to split up by a separator.</p></div>
+    <p>If you have a data frame with variables <code>apple</code>, <code>banana</code>, <code>cantaloupe</code>,
+<code>date</code>, <code>eggplant</code>, <code>fig</code>, <code>grape</code> you can:</p><ul>
+<li><p>Select individual variables with their name: e.g. <code><a href='https://rdrr.io/r/base/c.html'>c(apple, fig, grape)</a></code>.</p></li>
+<li><p>Select data-variables stored in an env-variable with <code>all_of()</code> (which
+will error if a variable is not found) or <code>any_of()</code> (which is
+relaxed and will silently drop missing variables), e.g.
+if <code>vars &lt;- c("apple", "fig", "peach")</code>, then <code>all_of(vars)</code> will
+error; <code>any_of(vars)</code> will select <code>apple</code> and <code>fig</code>.</p></li>
+<li><p>Select contiguous variables with <code>:</code>, e.g. <code>apple:date</code>.</p></li>
+<li><p>Select variables with name-based helpers: e.g. <code><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>ends_with("a")</a></code>,
+<code><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>contains("g")</a></code>. See full list in <a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>tidyselect::select_helpers</a>.</p></li>
+<li><p>Select variables of a given type with an <code>is</code> function: <code>is.numeric</code>,
+<code>is.factor</code>, <code>is.character</code>, etc.</p></li>
+<li><p>Invert a selection with <code>!</code>: <code>!is.numeric</code>, or <code>!contains("x")</code>.</p></li>
+<li><p>Create logical combination with <code>|</code> and <code>&amp;</code>:
+<code>starts_with("a") | starts_with("b")</code>, <code>contains("x") &amp; is.numeric</code></p></li>
+<li><p>Remove variables from a collection with <code>&amp;</code> and <code>!</code>:
+<code>is.numeric &amp; !starts_with("a")</code></p></li>
+</ul>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>NA</span>, <span class='st'>"a-b"</span>, <span class='st'>"a-d"</span>, <span class='st'>"b-c"</span>, <span class='st'>"d-e"</span>))
-<span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>extract</span>(<span class='no'>x</span>, <span class='st'>"A"</span>)</div><div class='output co'>#&gt;      A
-#&gt; 1 &lt;NA&gt;
-#&gt; 2    a
-#&gt; 3    a
-#&gt; 4    b
-#&gt; 5    d</div><div class='input'><span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>extract</span>(<span class='no'>x</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>), <span class='st'>"([[:alnum:]]+)-([[:alnum:]]+)"</span>)</div><div class='output co'>#&gt;      A    B
-#&gt; 1 &lt;NA&gt; &lt;NA&gt;
-#&gt; 2    a    b
-#&gt; 3    a    d
-#&gt; 4    b    c
-#&gt; 5    d    e</div><div class='input'>
-<span class='co'># If no match, NA:</span>
-<span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>extract</span>(<span class='no'>x</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"A"</span>, <span class='st'>"B"</span>), <span class='st'>"([a-d]+)-([a-d]+)"</span>)</div><div class='output co'>#&gt;      A    B
-#&gt; 1 &lt;NA&gt; &lt;NA&gt;
-#&gt; 2    a    b
-#&gt; 3    a    d
-#&gt; 4    b    c
-#&gt; 5 &lt;NA&gt; &lt;NA&gt;</div></pre>
+    <h2 class="hasAnchor" id="indirection"><a class="anchor" href="#indirection"></a>Indirection</h2>
+
+    <p>There are two main cases:</p><ul>
+<li><p>If you have a character vector of column names, use <code>all_of()</code>
+or <code>any_of()</code>, depending on whether or not you want unknown variable
+names to cause an error, e.g <code><a href='nest.html'>unnest(df, all_of(vars))</a></code>,
+<code><a href='nest.html'>unnest(df, -any_of(vars))</a></code>.</p></li>
+<li><p>If you want the user to supply a tidyselect specification in a
+function argument, you need to tunnel the selection through the function
+argument. This is done by embracing the function argument <code>{{ }}</code>,
+e.g <code><a href='nest.html'>unnest(df, {{ vars }})</a></code>.</p></li>
+</ul>
+
+<p>Learn more in <code>vignette("programming.Rmd")</code>.</p>
+
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
