@@ -39,6 +39,8 @@
 #' @param names_glue Instead of `names_sep` and `names_prefix`, you can supply
 #'   a glue specification that uses the `names_from` columns (and special
 #'   `.value`) to create custom column names.
+#' @param names_sort Should the column names be sorted? If `FALSE`, the default,
+#'   column names are ordered by first appearance.
 #' @param values_fill Optionally, a value that specifies what each `value`
 #'   should be filled in with when missing.
 #'
@@ -50,6 +52,7 @@
 #'
 #'   This can be a named list if you want to apply different aggregations
 #'   to different value columns.
+#' @param ... Additional arguments passed on to methods.
 #' @export
 #' @examples
 #' # See vignette("pivot") for examples and explanation
@@ -96,11 +99,30 @@ pivot_wider <- function(data,
                         names_prefix = "",
                         names_sep = "_",
                         names_glue = NULL,
+                        names_sort = FALSE,
                         names_repair = "check_unique",
                         values_from = value,
                         values_fill = NULL,
-                        values_fn = NULL) {
+                        values_fn = NULL,
+                        ...) {
+  ellipsis::check_dots_used()
+  UseMethod("pivot_wider")
+}
 
+#' @export
+pivot_wider.data.frame <- function(data,
+                                   id_cols = NULL,
+                                   names_from = name,
+                                   names_prefix = "",
+                                   names_sep = "_",
+                                   names_glue = NULL,
+                                   names_sort = FALSE,
+                                   names_repair = "check_unique",
+                                   values_from = value,
+                                   values_fill = NULL,
+                                   values_fn = NULL,
+                                   ...
+                                   ) {
   names_from <- enquo(names_from)
   values_from <- enquo(values_from)
   spec <- build_wider_spec(data,
@@ -108,7 +130,8 @@ pivot_wider <- function(data,
     values_from = !!values_from,
     names_prefix = names_prefix,
     names_sep = names_sep,
-    names_glue = names_glue
+    names_glue = names_glue,
+    names_sort = names_sort
   )
 
   id_cols <- enquo(id_cols)
@@ -259,11 +282,17 @@ build_wider_spec <- function(data,
                              values_from = value,
                              names_prefix = "",
                              names_sep = "_",
-                             names_glue = NULL) {
+                             names_glue = NULL,
+                             names_sort = FALSE
+                             ) {
   names_from <- tidyselect::eval_select(enquo(names_from), data)
   values_from <- tidyselect::eval_select(enquo(values_from), data)
 
   row_ids <- vec_unique(data[names_from])
+  if (names_sort) {
+    row_ids <- vec_sort(row_ids)
+  }
+
   row_names <- exec(paste, !!!row_ids, sep = names_sep)
 
   out <- tibble(
