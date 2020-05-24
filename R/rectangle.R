@@ -269,15 +269,15 @@ unnest_wider <- function(data, col,
 #' @rdname hoist
 unnest_auto <- function(data, col) {
   check_present(col)
-  col <- tidyselect::vars_pull(tbl_vars(data), !!enquo(col))
+  col <- tidyselect::vars_pull(tbl_vars(data), {{ col }})
 
   x <- data[[col]]
   dir <- guess_dir(x, col)
 
   switch(dir,
-    longer = unnest_longer(data, col, indices_include = FALSE),
-    longer_idx = unnest_longer(data, col, indices_include = TRUE),
-    wider = unnest_wider(data, col, names_repair = "unique")
+    longer = unnest_longer(data, {{ col }}, indices_include = FALSE),
+    longer_idx = unnest_longer(data, {{ col }}, indices_include = TRUE),
+    wider = unnest_wider(data, {{ col }}, names_repair = "unique")
   )
 }
 
@@ -378,6 +378,16 @@ simplify_col <- function(x, nm, ptype = list(), transform = list(), simplify = F
       return(x)
     } else {
       abort(glue("Can't simplfy '{nm}'; contains a nested list"))
+    }
+  }
+
+  # Don't try and simplify non-vectors
+  is_vec <- map_lgl(x, ~ vec_is(.x) || is.null(.x))
+  if (any(!is_vec)) {
+    if (is.null(ptype)) {
+      return(x)
+    } else {
+      abort(glue("Can't simplfy '{nm}'; contains a non-vector"))
     }
   }
 

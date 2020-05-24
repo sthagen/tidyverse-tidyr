@@ -31,13 +31,15 @@ test_that("can check check/transform values", {
 
 test_that("supplying ptype increases stringency of simplify", {
   df <- tibble(x = list(
-    list(a = 1:2, b = list(list())),
-    list(a = 1, b = list(list()))
+    list(a = 1:2, b = list(list()), c = quote(a)),
+    list(a = 1, b = list(list()), c = quote(b)),
+    list(a = 1, b = list(list()), c = NULL)
   ))
 
-  ptype <- list(a = integer(), b = integer())
+  ptype <- list(a = integer(), b = integer(), c = integer())
   expect_error(df %>% hoist(x, "a", .ptype = ptype), "length > 1")
   expect_error(df %>% hoist(x, "b", .ptype = ptype), "nested list")
+  expect_error(df %>% hoist(x, "c", .ptype = ptype), "non-vector")
 })
 
 test_that("doesn't simplify uneven lengths", {
@@ -58,6 +60,16 @@ test_that("doesn't simplify lists of lists", {
 
   out <- df %>% hoist(x, a = "a")
   expect_equal(out$a, list(list(1), list(2)))
+})
+
+test_that("doesn't simplify non-vectors", {
+  df <- tibble(x = list(
+    list(a = quote(a)),
+    list(a = quote(b))
+  ))
+
+  out <- df %>% hoist(x, a = "a")
+  expect_equal(out$a, list(quote(a), quote(b)))
 })
 
 test_that("can hoist out scalars", {
@@ -300,3 +312,12 @@ test_that("mix of named and unnamed becomes longer", {
   expect_named(out, c("x", "y"))
 })
 
+# https://github.com/tidyverse/tidyr/issues/959
+test_that("works with an input that has column named `col`", {
+  df <- tibble(
+    col = 1L,
+    list_col = list(list(x = "a", y = "b"), list(x = "c", y = "d"))
+  )
+  expect_message(out <- df %>% unnest_auto(list_col), "unnest_wider")
+  expect_named(out, c("col", "x", "y"))
+})

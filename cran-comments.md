@@ -10,24 +10,40 @@
 
 ## revdepcheck results
 
-We checked 875 reverse dependencies (782 from CRAN + 93 from BioConductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 876 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 0 new problems
- * We failed to check 12 packages
+ * We saw 2 new problems
+ * We failed to check 17 packages
 
 Issues with CRAN packages are summarised below.
 
+### New problems
+(This reports the first line of each new failure)
+
+* dartR
+  checking whether package ‘dartR’ can be installed ... WARNING
+  False positive with rgl.
+
+* jstor
+  checking tests ... ERROR
+  Timed out
+
 ### Failed to check
 
-* circumplex   (NA)
-* colorednoise (NA)
-* dexter       (NA)
-* dscore       (NA)
-* dynfrail     (NA)
-* nationwider  (NA)
-* nlmixr       (NA)
-* phenofit     (NA)
-* RxODE        (NA)
-* sf           (NA)
-* trialr       (NA)
-* vlad         (NA)
+* CB2              (NA)
+* crawl            (NA)
+* diceR            (NA)
+* dimRed           (NA)
+* fingertipscharts (NA)
+* GADMTools        (NA)
+* ggmsa            (NA)
+* gtsummary        (NA)
+* PWFSLSmoke       (NA)
+* rmapzen          (NA)
+* SimDesign        (NA)
+* simplevis        (NA)
+* stats19          (NA)
+* sugarbag         (NA)
+* tidygeocoder     (NA)
+* tmap             (NA)
+* wrswoR           (NA)
