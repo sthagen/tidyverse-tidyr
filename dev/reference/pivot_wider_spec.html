@@ -92,7 +92,7 @@ that allows you to describe pivotting with a data frame." />
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -112,22 +112,17 @@ that allows you to describe pivotting with a data frame." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -138,7 +133,7 @@ that allows you to describe pivotting with a data frame." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Release notes</li>
+    <li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -168,7 +163,7 @@ that allows you to describe pivotting with a data frame." />
     </li>
     <li class="divider"></li>
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -216,7 +211,8 @@ that allows you to describe pivotting with a data frame.</p>
   <span class='kw'>values_from</span> <span class='kw'>=</span> <span class='no'>value</span>,
   <span class='kw'>names_prefix</span> <span class='kw'>=</span> <span class='st'>""</span>,
   <span class='kw'>names_sep</span> <span class='kw'>=</span> <span class='st'>"_"</span>,
-  <span class='kw'>names_glue</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+  <span class='kw'>names_glue</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>names_sort</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -243,7 +239,7 @@ it is automatically removed after pivotting.</p></td>
       <td><p>What happens if the output has invalid column names?
 The default, <code>"check_unique"</code> is to error if the columns are duplicated.
 Use <code>"minimal"</code> to allow duplicates in the output, or <code>"unique"</code> to
-de-duplicated by adding numeric suffixes. See <code><a href='https://rdrr.io/pkg/vctrs/man/vec_as_names.html'>vctrs::vec_as_names()</a></code>
+de-duplicated by adding numeric suffixes. See <code><a href='https://vctrs.r-lib.org/reference/vec_as_names.html'>vctrs::vec_as_names()</a></code>
 for more options.</p></td>
     </tr>
     <tr>
@@ -251,13 +247,13 @@ for more options.</p></td>
       <td><p>&lt;<code><a href='tidyr_tidy_select.html'>tidy-select</a></code>&gt; A set of columns that
 uniquely identifies each observation. Defaults to all columns in <code>data</code>
 except for the columns specified in <code>names_from</code> and <code>values_from</code>.
-Typically used when you have additional variables that are directly
-related.</p></td>
+Typically used when you have redundant variables, i.e. variables whose
+values are perfectly correlated with existing variables.</p></td>
     </tr>
     <tr>
       <th>values_fill</th>
-      <td><p>Optionally, a value that specifies what each <code>value</code>
-should be filled in with when missing.</p>
+      <td><p>Optionally, a (scalar) value that specifies what each
+<code>value</code> should be filled in with when missing.</p>
 <p>This can be a named list if you want to apply different aggregations
 to different value columns.</p></td>
     </tr>
@@ -273,7 +269,7 @@ to different value columns.</p></td>
       <th>names_from</th>
       <td><p>&lt;<code><a href='tidyr_tidy_select.html'>tidy-select</a></code>&gt; A pair of
 arguments describing which column (or columns) to get the name of the
-output column (<code>name_from</code>), and which column (or columns) to get the
+output column (<code>names_from</code>), and which column (or columns) to get the
 cell values from (<code>values_from</code>).</p>
 <p>If <code>values_from</code> contains multiple values, the value will be added to the
 front of the output column.</p></td>
@@ -282,7 +278,7 @@ front of the output column.</p></td>
       <th>values_from</th>
       <td><p>&lt;<code><a href='tidyr_tidy_select.html'>tidy-select</a></code>&gt; A pair of
 arguments describing which column (or columns) to get the name of the
-output column (<code>name_from</code>), and which column (or columns) to get the
+output column (<code>names_from</code>), and which column (or columns) to get the
 cell values from (<code>values_from</code>).</p>
 <p>If <code>values_from</code> contains multiple values, the value will be added to the
 front of the output column.</p></td>
@@ -304,6 +300,11 @@ string to use as a column name.</p></td>
       <td><p>Instead of <code>names_sep</code> and <code>names_prefix</code>, you can supply
 a glue specification that uses the <code>names_from</code> columns (and special
 <code>.value</code>) to create custom column names.</p></td>
+    </tr>
+    <tr>
+      <th>names_sort</th>
+      <td><p>Should the column names be sorted? If <code>FALSE</code>, the default,
+column names are ordered by first appearance.</p></td>
     </tr>
     </table>
 

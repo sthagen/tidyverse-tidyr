@@ -95,7 +95,7 @@ Learn more in vignette(&quot;pivot&quot;)." />
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -115,22 +115,17 @@ Learn more in vignette(&quot;pivot&quot;)." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -141,7 +136,7 @@ Learn more in vignette(&quot;pivot&quot;)." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Release notes</li>
+    <li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -171,7 +166,7 @@ Learn more in vignette(&quot;pivot&quot;)." />
     </li>
     <li class="divider"></li>
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -215,10 +210,13 @@ decreasing the number of columns. The inverse transformation is
   <span class='kw'>names_sep</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>names_pattern</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>names_ptypes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>names_transform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
   <span class='kw'>names_repair</span> <span class='kw'>=</span> <span class='st'>"check_unique"</span>,
   <span class='kw'>values_to</span> <span class='kw'>=</span> <span class='st'>"value"</span>,
   <span class='kw'>values_drop_na</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>values_ptypes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+  <span class='kw'>values_ptypes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>values_transform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='no'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -267,17 +265,26 @@ needed.</p></td>
       <th>names_ptypes, values_ptypes</th>
       <td><p>A list of column name-prototype pairs.
 A prototype (or ptype for short) is a zero-length vector (like <code><a href='https://rdrr.io/r/base/integer.html'>integer()</a></code>
-or <code><a href='https://rdrr.io/r/base/numeric.html'>numeric()</a></code>) that defines the type, class, and attributes of a vector.</p>
+or <code><a href='https://rdrr.io/r/base/numeric.html'>numeric()</a></code>) that defines the type, class, and attributes of a vector.
+Use these arguments to confirm that the created columns are the types that
+you expect.</p>
 <p>If not specified, the type of the columns generated from <code>names_to</code> will
 be character, and the type of the variables generated from <code>values_to</code>
 will be the common type of the input columns used to generate them.</p></td>
+    </tr>
+    <tr>
+      <th>names_transform, values_transform</th>
+      <td><p>A list of column name-function pairs.
+Use these arguments if you need to change the type of specific columns.
+For example, <code>names_transform = list(week = as.integer)</code> would convert
+a character week variable to an integer.</p></td>
     </tr>
     <tr>
       <th>names_repair</th>
       <td><p>What happens if the output has invalid column names?
 The default, <code>"check_unique"</code> is to error if the columns are duplicated.
 Use <code>"minimal"</code> to allow duplicates in the output, or <code>"unique"</code> to
-de-duplicated by adding numeric suffixes. See <code><a href='https://rdrr.io/pkg/vctrs/man/vec_as_names.html'>vctrs::vec_as_names()</a></code>
+de-duplicated by adding numeric suffixes. See <code><a href='https://vctrs.r-lib.org/reference/vec_as_names.html'>vctrs::vec_as_names()</a></code>
 for more options.</p></td>
     </tr>
     <tr>
@@ -294,6 +301,10 @@ existing column names.</p></td>
 in the <code>value_to</code> column. This effectively converts explicit missing values
 to implicit missing values, and should generally be used only when missing
 values in <code>data</code> were created by its structure.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Additional arguments passed on to methods.</p></td>
     </tr>
     </table>
 
@@ -331,7 +342,7 @@ under active development.</p>
 #&gt; </span><span style='color: #555555;'>18</span><span> Unaffil…     217       299       374       365       341       528        407
 #&gt; </span><span style='color: #555555;'># … with 3 more variables: `$100-150k` </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, `&gt;150k` </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, `Don't</span><span>
 #&gt; </span><span style='color: #555555;'>#   know/refused` </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span></div><div class='input'><span class='no'>relig_income</span> <span class='kw'>%&gt;%</span>
- <span class='fu'>pivot_longer</span>(-<span class='no'>religion</span>, <span class='kw'>names_to</span> <span class='kw'>=</span> <span class='st'>"income"</span>, <span class='kw'>values_to</span> <span class='kw'>=</span> <span class='st'>"count"</span>)</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 180 x 3</span><span>
+  <span class='fu'>pivot_longer</span>(-<span class='no'>religion</span>, <span class='kw'>names_to</span> <span class='kw'>=</span> <span class='st'>"income"</span>, <span class='kw'>values_to</span> <span class='kw'>=</span> <span class='st'>"count"</span>)</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 180 x 3</span><span>
 #&gt;    religion income             count
 #&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>              </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
 #&gt; </span><span style='color: #555555;'> 1</span><span> Agnostic &lt;$10k                 27
@@ -373,7 +384,7 @@ under active development.</p>
 #&gt; </span><span style='color: #555555;'>#   wk65 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, wk66 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk67 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk68 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk69 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk70 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>,</span><span>
 #&gt; </span><span style='color: #555555;'>#   wk71 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk72 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk73 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk74 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk75 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span style='color: #555555;'>, wk76 </span><span style='color: #555555;font-style: italic;'>&lt;lgl&gt;</span><span></div><div class='input'><span class='no'>billboard</span> <span class='kw'>%&gt;%</span>
  <span class='fu'>pivot_longer</span>(
-   <span class='kw'>cols</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>starts_with</a></span>(<span class='st'>"wk"</span>),
+   <span class='kw'>cols</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>starts_with</a></span>(<span class='st'>"wk"</span>),
    <span class='kw'>names_to</span> <span class='kw'>=</span> <span class='st'>"week"</span>,
    <span class='kw'>names_prefix</span> <span class='kw'>=</span> <span class='st'>"wk"</span>,
    <span class='kw'>values_to</span> <span class='kw'>=</span> <span class='st'>"rank"</span>,
@@ -425,7 +436,7 @@ under active development.</p>
 #&gt; 9  12 12 12  8 10.84 9.13  8.15  5.56
 #&gt; 10  7  7  7  8  4.82 7.26  6.42  7.91
 #&gt; 11  5  5  5  8  5.68 4.74  5.73  6.89</div><div class='input'><span class='no'>anscombe</span> <span class='kw'>%&gt;%</span>
- <span class='fu'>pivot_longer</span>(<span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>everything</a></span>(),
+ <span class='fu'>pivot_longer</span>(<span class='fu'><a href='https://tidyselect.r-lib.org/reference/everything.html'>everything</a></span>(),
    <span class='kw'>names_to</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>".value"</span>, <span class='st'>"set"</span>),
    <span class='kw'>names_pattern</span> <span class='kw'>=</span> <span class='st'>"(.)(.)"</span>
  )</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 44 x 3</span><span>

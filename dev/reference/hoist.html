@@ -100,7 +100,7 @@ Learn more in vignette(&quot;rectangle&quot;)." />
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -120,22 +120,17 @@ Learn more in vignette(&quot;rectangle&quot;)." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -146,7 +141,7 @@ Learn more in vignette(&quot;rectangle&quot;)." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Release notes</li>
+    <li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -176,7 +171,7 @@ Learn more in vignette(&quot;rectangle&quot;)." />
     </li>
     <li class="divider"></li>
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -217,7 +212,15 @@ based heuristics described below.</p>
 <p>Learn more in <code><a href='../articles/rectangle.html'>vignette("rectangle")</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>hoist</span>(<span class='no'>.data</span>, <span class='no'>.col</span>, <span class='no'>...</span>, <span class='kw'>.remove</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>.simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>.ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>())
+    <pre class="usage"><span class='fu'>hoist</span>(
+  <span class='no'>.data</span>,
+  <span class='no'>.col</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>.remove</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>.simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>.ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>.transform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+)
 
 <span class='fu'>unnest_longer</span>(
   <span class='no'>data</span>,
@@ -227,7 +230,8 @@ based heuristics described below.</p>
   <span class='kw'>indices_include</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>names_repair</span> <span class='kw'>=</span> <span class='st'>"check_unique"</span>,
   <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+  <span class='kw'>ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>transform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
 )
 
 <span class='fu'>unnest_wider</span>(
@@ -236,7 +240,8 @@ based heuristics described below.</p>
   <span class='kw'>names_sep</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>simplify</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>names_repair</span> <span class='kw'>=</span> <span class='st'>"check_unique"</span>,
-  <span class='kw'>ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+  <span class='kw'>ptype</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>transform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
 )
 
 <span class='fu'>unnest_auto</span>(<span class='no'>data</span>, <span class='no'>col</span>)</pre>
@@ -269,14 +274,21 @@ is short-hand for <code>hoist(df, col, x = "x")</code>.</p></td>
 from <code>.col</code>. This ensures that each value lives only in one place.</p></td>
     </tr>
     <tr>
-      <th>.simplify</th>
-      <td><p>If <code>TRUE</code>, will attempt to simplify lists of length-1
-vectors to an atomic vector</p></td>
+      <th>.simplify, simplify</th>
+      <td><p>If <code>TRUE</code>, will attempt to simplify lists of
+length-1 vectors to an atomic vector</p></td>
     </tr>
     <tr>
-      <th>.ptype</th>
+      <th>.ptype, ptype</th>
       <td><p>Optionally, a named list of prototypes declaring the desired
-output type of each component.</p></td>
+output type of each component. Use this argument if you want to check each
+element has the types you expect when simplifying.</p></td>
+    </tr>
+    <tr>
+      <th>.transform, transform</th>
+      <td><p>Optionally, a named list of transformation functions
+applied to each component. Use this function if you want transform or
+parse individual elements as they are hoisted.</p></td>
     </tr>
     <tr>
       <th>values_to</th>
@@ -306,19 +318,8 @@ names. Must be one of the following options:</p><ul>
 <li><p>a formula: a purrr-style anonymous function (see <code><a href='https://rlang.r-lib.org/reference/as_function.html'>rlang::as_function()</a></code>)</p></li>
 </ul>
 
-<p>See <code><a href='https://rdrr.io/pkg/vctrs/man/vec_as_names.html'>vctrs::vec_as_names()</a></code> for more details on these terms and the
+<p>See <code><a href='https://vctrs.r-lib.org/reference/vec_as_names.html'>vctrs::vec_as_names()</a></code> for more details on these terms and the
 strategies used to enforce them.</p></td>
-    </tr>
-    <tr>
-      <th>simplify</th>
-      <td><p>If <code>TRUE</code>, will attempt to simplify lists of length-1
-vectors to an atomic vector</p></td>
-    </tr>
-    <tr>
-      <th>ptype</th>
-      <td><p>Optionally, supply a data frame prototype for the output <code>cols</code>,
-overriding the default that will be guessed from the combination of
-individual values.</p></td>
     </tr>
     <tr>
       <th>names_sep</th>

@@ -96,7 +96,7 @@ Learn more in vignette(&quot;nest&quot;)." />
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -116,22 +116,17 @@ Learn more in vignette(&quot;nest&quot;)." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -142,7 +137,7 @@ Learn more in vignette(&quot;nest&quot;)." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Release notes</li>
+    <li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -172,7 +167,7 @@ Learn more in vignette(&quot;nest&quot;)." />
     </li>
     <li class="divider"></li>
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -302,7 +297,7 @@ names. Must be one of the following options:</p><ul>
 <li><p>a formula: a purrr-style anonymous function (see <code><a href='https://rlang.r-lib.org/reference/as_function.html'>rlang::as_function()</a></code>)</p></li>
 </ul>
 
-<p>See <code><a href='https://rdrr.io/pkg/vctrs/man/vec_as_names.html'>vctrs::vec_as_names()</a></code> for more details on these terms and the
+<p>See <code><a href='https://vctrs.r-lib.org/reference/vec_as_names.html'>vctrs::vec_as_names()</a></code> for more details on these terms and the
 strategies used to enforce them.</p></td>
     </tr>
     <tr>
@@ -336,8 +331,8 @@ designed to be more similar to other functions. Converting to the new syntax
 should be straightforward (guided by the message you'll recieve) but if
 you just need to run an old analysis, you can easily revert to the previous
 behaviour using <code><a href='nest_legacy.html'>nest_legacy()</a></code> and <code><a href='nest_legacy.html'>unnest_legacy()</a></code> as follows:</p><pre><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>tidyr</span>)
-<span class='no'>nest</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='no'>nest_legacy</span>
-<span class='no'>unnest</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='no'>unnest_legacy</span></pre>
+<span class='no'>nest</span> <span class='kw'>&lt;-</span> <span class='no'>nest_legacy</span>
+<span class='no'>unnest</span> <span class='kw'>&lt;-</span> <span class='no'>unnest_legacy</span></pre>
 
     <h2 class="hasAnchor" id="grouped-data-frames"><a class="anchor" href="#grouped-data-frames"></a>Grouped data frames</h2>
 
@@ -387,13 +382,13 @@ result preserves the grouping of the input.</p>
 #&gt; </span><span style='color: #555555;'>1</span><span> setosa     </span><span style='color: #555555;'>&lt;tibble [50 × 4]&gt;</span><span>
 #&gt; </span><span style='color: #555555;'>2</span><span> versicolor </span><span style='color: #555555;'>&lt;tibble [50 × 4]&gt;</span><span>
 #&gt; </span><span style='color: #555555;'>3</span><span> virginica  </span><span style='color: #555555;'>&lt;tibble [50 × 4]&gt;</span><span></div><div class='input'><span class='no'>iris</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>nest</span>(<span class='kw'>petal</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>starts_with</a></span>(<span class='st'>"Petal"</span>), <span class='kw'>sepal</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>starts_with</a></span>(<span class='st'>"Sepal"</span>))</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 3 x 3</span><span>
+  <span class='fu'>nest</span>(<span class='kw'>petal</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>starts_with</a></span>(<span class='st'>"Petal"</span>), <span class='kw'>sepal</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>starts_with</a></span>(<span class='st'>"Sepal"</span>))</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 3 x 3</span><span>
 #&gt;   Species    petal             sepal            
 #&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>           
 #&gt; </span><span style='color: #555555;'>1</span><span> setosa     </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span> </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span>
 #&gt; </span><span style='color: #555555;'>2</span><span> versicolor </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span> </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span>
 #&gt; </span><span style='color: #555555;'>3</span><span> virginica  </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span> </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span></div><div class='input'><span class='no'>iris</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>nest</span>(<span class='kw'>width</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>contains</a></span>(<span class='st'>"Width"</span>), <span class='kw'>length</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/select_helpers.html'>contains</a></span>(<span class='st'>"Length"</span>))</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 3 x 3</span><span>
+  <span class='fu'>nest</span>(<span class='kw'>width</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>contains</a></span>(<span class='st'>"Width"</span>), <span class='kw'>length</span> <span class='kw'>=</span> <span class='fu'><a href='https://tidyselect.r-lib.org/reference/starts_with.html'>contains</a></span>(<span class='st'>"Length"</span>))</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 3 x 3</span><span>
 #&gt;   Species    width             length           
 #&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;list&gt;</span><span>           
 #&gt; </span><span style='color: #555555;'>1</span><span> setosa     </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span> </span><span style='color: #555555;'>&lt;tibble [50 × 2]&gt;</span><span>

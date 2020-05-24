@@ -19,7 +19,8 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><link href="../tidyverse-2.css" rel="stylesheet">
 <meta property="og:title" content="In packages">
-<meta property="og:description" content="tidyr">
+<meta property="og:description" content="Things to bear in mind when using tidyr in a package.
+">
 <meta property="og:image" content="https://tidyr.tidyverse.org/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="noindex">
@@ -50,7 +51,7 @@
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -70,22 +71,17 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider">
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -96,7 +92,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-<li class="dropdown-header">Release notes</li>
+<li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -126,7 +122,7 @@
     </li>
     <li class="divider">
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -173,7 +169,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">purrr</span>)
 
 <span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html">packageVersion</a></span>(<span class="st">"tidyr"</span>)
-<span class="co">#&gt; [1] '1.0.2.9000'</span>
+<span class="co">#&gt; [1] '1.1.0.9000'</span>
 
 <span class="no">mini_iris</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html">as_tibble</a></span>(<span class="no">iris</span>)[<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">51</span>, <span class="fl">52</span>, <span class="fl">101</span>, <span class="fl">102</span>), ]
 <span class="no">mini_iris</span>
@@ -210,7 +206,7 @@
 <span class="co">#&gt; 2 versicolor &lt;tibble [2 × 2]&gt; &lt;tibble [2 × 2]&gt;</span>
 <span class="co">#&gt; 3 virginica  &lt;tibble [2 × 2]&gt; &lt;tibble [2 × 2]&gt;</span></pre></body></html></div>
 <p>But <code>R CMD check</code> will warn about undefined global variables (<code>Petal.Length</code>, <code>Petal.Width</code>, <code>Sepal.Length</code>, and <code>Sepal.Width</code>), because it doesn’t know that <code><a href="../reference/nest.html">nest()</a></code> is looking for the variables inside of <code>mini_iris</code> (i.e. <code>Petal.Length</code> and friends are data-variables, not env-variables).</p>
-<p>The easiest way to silence this note is to use <code>all_of()</code>. <code>all_of()</code> is a tidyselect helper (like <code><a href="https://tidyselect.r-lib.org/reference/select_helpers.html">starts_with()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/select_helpers.html">ends_with()</a></code>, etc.) that takes column names stored as strings:</p>
+<p>The easiest way to silence this note is to use <code>all_of()</code>. <code>all_of()</code> is a tidyselect helper (like <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with()</a></code>, etc.) that takes column names stored as strings:</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">mini_iris</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="../reference/nest.html">nest</a></span>(
   <span class="kw">petal</span> <span class="kw">=</span> <span class="fu">all_of</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Petal.Length"</span>, <span class="st">"Petal.Width"</span>)),
   <span class="kw">sepal</span> <span class="kw">=</span> <span class="fu">all_of</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Sepal.Length"</span>, <span class="st">"Sepal.Width"</span>))
@@ -319,7 +315,7 @@
 <li>
 <p>The <code>new_col = &lt;something about existing cols&gt;</code> construct lets us create multiple nested list-columns at once (“multi-nest”).</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">mini_iris</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="../reference/nest.html">nest</a></span>(<span class="kw">petal</span> <span class="kw">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/select_helpers.html">matches</a></span>(<span class="st">"Petal"</span>), <span class="kw">sepal</span> <span class="kw">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/select_helpers.html">matches</a></span>(<span class="st">"Sepal"</span>))
+  <span class="fu"><a href="../reference/nest.html">nest</a></span>(<span class="kw">petal</span> <span class="kw">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">matches</a></span>(<span class="st">"Petal"</span>), <span class="kw">sepal</span> <span class="kw">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">matches</a></span>(<span class="st">"Sepal"</span>))
 <span class="co">#&gt; # A tibble: 3 x 3</span>
 <span class="co">#&gt;   Species    petal            sepal           </span>
 <span class="co">#&gt;   &lt;fct&gt;      &lt;list&gt;           &lt;list&gt;          </span>

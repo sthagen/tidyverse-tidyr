@@ -98,7 +98,7 @@ more suitable for programming than interactive data analysis." />
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.0.2.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
         </div>
       </div>
     </div>
@@ -118,22 +118,17 @@ more suitable for programming than interactive data analysis." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/in-packages.html">In packages</a>
-    </li>
-    <li>
-      <a href="../articles/nest.html">Nested data</a>
-    </li>
-    <li>
       <a href="../articles/pivot.html">Pivoting</a>
-    </li>
-    <li>
-      <a href="../articles/programming.html">Programming with tidyr</a>
     </li>
     <li>
       <a href="../articles/rectangle.html">Rectangling</a>
     </li>
     <li>
-      <a href="../articles/tidy-data.html">Tidy data</a>
+      <a href="../articles/nest.html">Nested data</a>
+    </li>
+    <li class="divider"></li>
+    <li>
+      <a href="../articles/index.html">More...</a>
     </li>
   </ul>
 </li>
@@ -144,7 +139,7 @@ more suitable for programming than interactive data analysis." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Release notes</li>
+    <li class="dropdown-header">Releases</li>
     <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
@@ -174,7 +169,7 @@ more suitable for programming than interactive data analysis." />
     </li>
     <li class="divider"></li>
     <li>
-      <a href="../news/index.html">Change log</a>
+      <a href="../news/index.html">Changelog</a>
     </li>
   </ul>
 </li>
@@ -255,7 +250,7 @@ individual values.</p></td>
 a complex data structure, and <code><a href='nest.html'>nest()</a></code>ing is usually more appropriate
 that <code>chop()</code>ing` since it better preserves the connections between
 observations.</p>
-<p><code>chop()</code> creates list-columns of class <code><a href='https://rdrr.io/pkg/vctrs/man/list_of.html'>vctrs::list_of()</a></code> to ensure
+<p><code>chop()</code> creates list-columns of class <code><a href='https://vctrs.r-lib.org/reference/list_of.html'>vctrs::list_of()</a></code> to ensure
 consistent behaviour when the chopped data frame is emptied. For
 instance this helps getting back the original column types after
 the roundtrip chop and unchop. Because <code>&lt;list_of&gt;</code> keeps tracks of
@@ -302,7 +297,7 @@ correct vector type even for empty list-columns.</p>
 <span class='co'># Incompatible types -------------------------------------------------</span>
 <span class='co'># If the list-col contains types that can not be natively</span>
 <span class='no'>df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"1"</span>, <span class='fl'>1</span>:<span class='fl'>3</span>))
-<span class='fu'><a href='https://rdrr.io/r/base/try.html'>try</a></span>(<span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>unchop</span>(<span class='no'>y</span>))</div><div class='output co'>#&gt; Error : No common type for `..1` &lt;character&gt; and `..2` &lt;integer&gt;.</div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/try.html'>try</a></span>(<span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>unchop</span>(<span class='no'>y</span>))</div><div class='output co'>#&gt; Error : Can't combine `..1` &lt;character&gt; and `..2` &lt;integer&gt;.</div><div class='input'>
 <span class='co'># Unchopping data frames -----------------------------------------------------</span>
 <span class='co'># Unchopping a list-col of data frames must generate a df-col because</span>
 <span class='co'># unchop leaves the column names unchanged</span>
