@@ -96,6 +96,9 @@ and shows you how it saves you time during data analysis.
   <ul class="dropdown-menu" role="menu">
 <li class="dropdown-header">Releases</li>
     <li>
+      <a href="https://www.tidyverse.org/blog/2020/05/tidyr-1.1.0/">Version 1.1.0</a>
+    </li>
+    <li>
       <a href="https://www.tidyverse.org/articles/2019/09/tidyr-1-0-0/">Version 1.0.0</a>
     </li>
     <li>
@@ -598,7 +601,7 @@ and shows you how it saves you time during data analysis.
 <span class="co">#&gt; # … with 307 more rows</span></pre></body></html></div>
 <p>Then use that to make a <code>rank</code> dataset by replacing repeated song facts with a pointer to song details (a unique song id):</p>
 <div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">rank</span> <span class="kw">&lt;-</span> <span class="no">billboard3</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>(<span class="no">song</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"artist"</span>, <span class="st">"track"</span>)) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span>(<span class="no">song</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"artist"</span>, <span class="st">"track"</span>)) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(<span class="no">song_id</span>, <span class="no">date</span>, <span class="no">week</span>, <span class="no">rank</span>)
 <span class="no">rank</span>
 <span class="co">#&gt; # A tibble: 5,307 x 4</span>
