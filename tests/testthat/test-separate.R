@@ -61,7 +61,9 @@ test_that("too many pieces dealt with as requested", {
   expect_equal(drop[[1]], c("a", "a"))
   expect_equal(drop[[2]], c("b", "b"))
 
-  expect_warning(separate(df, x, c("x", "y"), extra = "error"), "deprecated")
+  suppressWarnings(
+    expect_warning(separate(df, x, c("x", "y"), extra = "error"), "deprecated")
+  )
 })
 
 test_that("too few pieces dealt with as requested", {
@@ -117,6 +119,19 @@ test_that("checks type of `into` and `sep`", {
     separate(df, x, FALSE),
     "must be a character vector"
   )
+})
+
+# helpers -----------------------------------------------------------------
+
+test_that("str_split_n can cap number of splits", {
+  expect_equal(str_split_n(c("x,x"), ",", 1), list("x,x"))
+  expect_equal(str_split_n(c("x,x"), ",", 2), list(c("x", "x")))
+  expect_equal(str_split_n(c("x,x"), ",", 3), list(c("x", "x")))
+})
+
+test_that("str_split_n handles edge cases", {
+  expect_equal(str_split_n(character(), ",", 1), list())
+  expect_equal(str_split_n(NA, ",", 1), list(NA_character_))
 })
 
 test_that("list_indices truncates long warnings", {
