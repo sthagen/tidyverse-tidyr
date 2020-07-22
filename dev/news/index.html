@@ -43,6 +43,10 @@
 <script src="../pkgdown.js"></script>
 <link href="../tidyverse-2.css" rel="stylesheet">
 
+<!--optional theme-->
+<link href="../.css" rel="stylesheet">
+
+
 
 
 <meta property="og:title" content="Changelog" />
@@ -195,6 +199,11 @@
 <h1 class="page-header" data-toc-text="development version">
 <a href="#tidyr-development-version" class="anchor"></a>tidyr (development version)<small> Unreleased </small>
 </h1>
+<ul>
+<li><p>New tidyr logo!</p></li>
+<li><p>stringi dependency has been removed; this was a substantial dependency that make tidyr hard to compile in resource constrained environments (<a href='https://github.com/rjpat'>@rjpat</a>, <a href='https://github.com/tidyverse/tidyr/issues/936'>#936</a>).</p></li>
+<li><p>Replace Rcpp with cpp11. See <a href="https://cpp11.r-lib.org/articles/motivations.html" class="uri">https://cpp11.r-lib.org/articles/motivations.html</a> for reasons why.</p></li>
+</ul>
 </div>
     <div id="tidyr-110" class="section level1">
 <h1 class="page-header" data-toc-text="1.1.0">
