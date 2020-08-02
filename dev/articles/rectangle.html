@@ -56,7 +56,7 @@ and `hoist()`.
         <a class="navbar-brand" href="../index.html">tidyr</a>
         <div class="info hidden-xs hidden-sm">
           <span class="partof">part of the <a href="https://tidyverse.org">tidyverse</a></span>
-          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.0.9000</span>
+          <span class="version version-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">1.1.1.9000</span>
         </div>
       </div>
     </div>
@@ -585,7 +585,7 @@ and `hoist()`.
 <span class="co">#&gt; #   id...14 &lt;int&gt;, rating &lt;int&gt;</span></pre></body></html></div>
 <p>The problem is that <code>basic_information</code> repeats the <code>id</code> column that’s also stored at the top-level, so we can just drop that:</p>
 <div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="no">discs</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(-<span class="no">id</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(!<span class="no">id</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/hoist.html">unnest_wider</a></span>(<span class="no">basic_information</span>)
 <span class="co">#&gt; # A tibble: 155 x 14</span>
 <span class="co">#&gt;    instance_id date_added          labels  year artists     id thumb title</span>
@@ -693,7 +693,7 @@ and `hoist()`.
 
 <div class="author">
   <p>
-    Developed by <a href="http://hadley.nz">Hadley Wickham</a>, Lionel Henry.
+    Developed by <a href="http://hadley.nz">Hadley Wickham</a>.
     Site built by <a href="https://pkgdown.r-lib.org">pkgdown</a>.
   </p>
 </div>
