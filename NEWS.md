@@ -1,5 +1,7 @@
 # tidyr (development version)
 
+# tidyr 1.1.1
+
 * New tidyr logo!
 
 * stringi dependency has been removed; this was a substantial dependency that

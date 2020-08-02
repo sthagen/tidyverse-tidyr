@@ -1,15 +1,11 @@
 Package: tidyr
 Title: Tidy Messy Data
-Version: 1.1.0.9000
+Version: 1.1.1.9000
 Authors@R: 
     c(person(given = "Hadley",
              family = "Wickham",
              role = c("aut", "cre"),
              email = "hadley@rstudio.com"),
-      person(given = "Lionel",
-             family = "Henry",
-             role = "aut",
-             email = "lionel@rstudio.com"),
       person(given = "RStudio",
              role = "cph"))
 Description: Tools to help to create tidy data, where each column is a 
