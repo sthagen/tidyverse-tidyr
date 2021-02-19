@@ -1,5 +1,3 @@
-context("test-hoist")
-
 # hoist -------------------------------------------------------------------
 
 test_that("hoist extracts named elements", {
@@ -267,6 +265,13 @@ test_that("can handle data frames consistently with vectors" , {
 
   expect_named(out, c("x", "y"))
   expect_equal(nrow(out), 4)
+})
+
+test_that("can unested dates", {
+  x <- as.Date(c("2019-08-01", "2019-12-01"))
+  df <- tibble(x = as.list(x))
+  out <- df %>% unnest_longer(x)
+  expect_equal(out$x, x)
 })
 
 test_that("bad inputs generate errors", {
