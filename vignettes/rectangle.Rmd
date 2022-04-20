@@ -8,7 +8,7 @@ description: |
   provided by tidyr: `unnest_longer()`, `unnest_wider()`, `unnest_auto()`,
   and `hoist()`.
 vignette: >
-  %\VignetteIndexEntry{rectangling}
+  %\VignetteIndexEntry{Rectangling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -246,17 +246,6 @@ loc %>%
   unnest_wider(results) %>%
   unnest_wider(geometry) %>%
   unnest_wider(location)
-```
-
-Again, `unnest_auto()` makes this simpler with the small risk of failing in unexpected ways if the input structure changes:
-
-```{r, eval = has_key}
-loc %>%
-  unnest_auto(json) %>%
-  unnest_auto(results) %>%
-  unnest_auto(results) %>%
-  unnest_auto(geometry) %>%
-  unnest_auto(location)
 ```
 
 We could also just look at the first address for each city:

@@ -28,11 +28,10 @@ of missing values.}
 
 \item{ptype}{Optionally, a named list of column name-prototype pairs to
 coerce \code{cols} to, overriding the default that will be guessed from
-combining the individual values.}
+combining the individual values. Alternatively, a single empty ptype
+can be supplied, which will be applied to all \code{cols}.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
-
 Chopping and unchopping preserve the width of a data frame, changing its
 length. \code{chop()} makes \code{df} shorter by converting rows within each group
 into list-columns. \code{unchop()} makes \code{df} longer by expanding list-columns
@@ -44,7 +43,7 @@ more suitable for programming than interactive data analysis.
 \details{
 Generally, unchopping is more useful than chopping because it simplifies
 a complex data structure, and \code{\link[=nest]{nest()}}ing is usually more appropriate
-that \code{chop()}ing` since it better preserves the connections between
+than \code{chop()}ing since it better preserves the connections between
 observations.
 
 \code{chop()} creates list-columns of class \code{\link[vctrs:list_of]{vctrs::list_of()}} to ensure

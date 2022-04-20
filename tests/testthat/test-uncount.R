@@ -27,7 +27,7 @@ test_that("works with groups", {
 })
 
 test_that("must evaluate to integer", {
-  df <- tibble(x = 1, w = 1/2)
+  df <- tibble(x = 1, w = 1 / 2)
   expect_error(uncount(df, w), class = "vctrs_error_cast_lossy")
 
   df <- tibble(x = 1)
@@ -41,5 +41,5 @@ test_that("works with 0 weights", {
 
 test_that("errors on negative weights", {
   df <- tibble(x = 1, w = -1)
-  expect_error(uncount(df, w), "all elements of `weights` must be >= 0")
+  expect_snapshot((expect_error(uncount(df, w))))
 })

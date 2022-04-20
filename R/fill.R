@@ -83,26 +83,24 @@
 #'   dplyr::ungroup()
 #'
 #' # Using `.direction = "updown"` accomplishes the same goal in this example
-
 fill <- function(data, ..., .direction = c("down", "up", "downup", "updown")) {
-  ellipsis::check_dots_unnamed()
+  check_dots_unnamed()
   UseMethod("fill")
 }
+
 #' @export
 fill.data.frame <- function(data, ..., .direction = c("down", "up", "downup", "updown")) {
   vars <- tidyselect::eval_select(expr(c(...)), data)
-  vec_fill <- vec_fill_fun(.direction)
 
-  dplyr::mutate_at(data, dplyr::vars(any_of(vars)), vec_fill)
-}
-
-vec_fill_fun <- function(.direction = c("down", "up", "downup", "updown")) {
-  .direction <- match.arg(.direction)
-  switch(
-    .direction,
-    down = fillDown,
-    up = fillUp,
-    downup = function(x) fillUp(fillDown(x)),
-    updown = function(x) fillDown(fillUp(x))
+  .direction <- arg_match0(
+    arg = .direction,
+    values = c("down", "up", "downup", "updown"),
+    arg_nm = ".direction"
   )
+
+  fn <- function(col) {
+    vec_fill_missing(col, direction = .direction)
+  }
+
+  dplyr::mutate_at(data, .vars = dplyr::vars(any_of(vars)), .funs = fn)
 }

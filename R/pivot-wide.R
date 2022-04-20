@@ -17,10 +17,20 @@
 #'   defines a pivotting specification.
 #' @inheritParams pivot_longer
 #' @param id_cols <[`tidy-select`][tidyr_tidy_select]> A set of columns that
-#'   uniquely identifies each observation. Defaults to all columns in `data`
-#'   except for the columns specified in `names_from` and `values_from`.
-#'   Typically used when you have redundant variables, i.e. variables whose
-#'   values are perfectly correlated with existing variables.
+#'   uniquely identify each observation. Typically used when you have
+#'   redundant variables, i.e. variables whose values are perfectly correlated
+#'   with existing variables.
+#'
+#'   Defaults to all columns in `data` except for the columns specified through
+#'   `names_from` and `values_from`. If a tidyselect expression is supplied, it
+#'   will be evaluated on `data` after removing the columns specified through
+#'   `names_from` and `values_from`.
+#' @param id_expand Should the values in the `id_cols` columns be expanded by
+#'   [expand()] before pivoting? This results in more rows, the output will
+#'   contain a complete expansion of all possible values in `id_cols`. Implicit
+#'   factor levels that aren't represented in the data will become explicit.
+#'   Additionally, the row values corresponding to the expanded `id_cols` will
+#'   be sorted.
 #' @param names_from,values_from <[`tidy-select`][tidyr_tidy_select]> A pair of
 #'   arguments describing which column (or columns) to get the name of the
 #'   output column (`names_from`), and which column (or columns) to get the
@@ -39,17 +49,49 @@
 #'   `.value`) to create custom column names.
 #' @param names_sort Should the column names be sorted? If `FALSE`, the default,
 #'   column names are ordered by first appearance.
+#' @param names_vary When `names_from` identifies a column (or columns) with
+#'   multiple unique values, and multiple `values_from` columns are provided,
+#'   in what order should the resulting column names be combined?
+#'
+#'   - `"fastest"` varies `names_from` values fastest, resulting in a column
+#'     naming scheme of the form: `value1_name1, value1_name2, value2_name1,
+#'     value2_name2`. This is the default.
+#'
+#'   - `"slowest"` varies `names_from` values slowest, resulting in a column
+#'     naming scheme of the form: `value1_name1, value2_name1, value1_name2,
+#'     value2_name2`.
+#' @param names_expand Should the values in the `names_from` columns be expanded
+#'   by [expand()] before pivoting? This results in more columns, the output
+#'   will contain column names corresponding to a complete expansion of all
+#'   possible values in `names_from`. Implicit factor levels that aren't
+#'   represented in the data will become explicit. Additionally, the column
+#'   names will be sorted, identical to what `names_sort` would produce.
 #' @param values_fill Optionally, a (scalar) value that specifies what each
 #'   `value` should be filled in with when missing.
 #'
-#'   This can be a named list if you want to apply different aggregations
-#'   to different value columns.
-#' @param values_fn Optionally, a function applied to the `value` in each cell
+#'   This can be a named list if you want to apply different fill values to
+#'   different value columns.
+#' @param values_fn Optionally, a function applied to the value in each cell
 #'   in the output. You will typically use this when the combination of
-#'   `id_cols` and `value` column does not uniquely identify an observation.
+#'   `id_cols` and `names_from` columns does not uniquely identify an
+#'   observation.
 #'
 #'   This can be a named list if you want to apply different aggregations
-#'   to different value columns.
+#'   to different `values_from` columns.
+#' @param unused_fn Optionally, a function applied to summarize the values from
+#'   the unused columns (i.e. columns not identified by `id_cols`,
+#'   `names_from`, or `values_from`).
+#'
+#'   The default drops all unused columns from the result.
+#'
+#'   This can be a named list if you want to apply different aggregations
+#'   to different unused columns.
+#'
+#'   `id_cols` must be supplied for `unused_fn` to be useful, since otherwise
+#'   all unspecified columns will be considered `id_cols`.
+#'
+#'   This is similar to grouping by the `id_cols` then summarizing the
+#'   unused columns using `unused_fn`.
 #' @param ... Additional arguments passed on to methods.
 #' @export
 #' @examples
@@ -65,7 +107,19 @@
 #' # Generate column names from multiple variables
 #' us_rent_income
 #' us_rent_income %>%
-#'   pivot_wider(names_from = variable, values_from = c(estimate, moe))
+#'   pivot_wider(
+#'     names_from = variable,
+#'     values_from = c(estimate, moe)
+#'   )
+#'
+#' # You can control whether `names_from` values vary fastest or slowest
+#' # relative to the `values_from` column names using `names_vary`.
+#' us_rent_income %>%
+#'   pivot_wider(
+#'     names_from = variable,
+#'     values_from = c(estimate, moe),
+#'     names_vary = "slowest"
+#'   )
 #'
 #' # When there are multiple `names_from` or `values_from`, you can use
 #' # use `names_sep` or `names_glue` to control the output variable names
@@ -82,7 +136,7 @@
 #'     values_from = c(estimate, moe)
 #'   )
 #'
-#' # Can perform aggregation with values_fn
+#' # Can perform aggregation with `values_fn`
 #' warpbreaks <- as_tibble(warpbreaks[c("wool", "tension", "breaks")])
 #' warpbreaks
 #' warpbreaks %>%
@@ -91,52 +145,84 @@
 #'     values_from = breaks,
 #'     values_fn = mean
 #'   )
+#'
+#' # Can pass an anonymous function to `values_fn` when you
+#' # need to supply additional arguments
+#' warpbreaks$breaks[1] <- NA
+#' warpbreaks %>%
+#'   pivot_wider(
+#'     names_from = wool,
+#'     values_from = breaks,
+#'     values_fn = ~ mean(.x, na.rm = TRUE)
+#'   )
 pivot_wider <- function(data,
                         id_cols = NULL,
+                        id_expand = FALSE,
                         names_from = name,
                         names_prefix = "",
                         names_sep = "_",
                         names_glue = NULL,
                         names_sort = FALSE,
+                        names_vary = "fastest",
+                        names_expand = FALSE,
                         names_repair = "check_unique",
                         values_from = value,
                         values_fill = NULL,
                         values_fn = NULL,
+                        unused_fn = NULL,
                         ...) {
-  ellipsis::check_dots_used()
+  check_dots_used()
   UseMethod("pivot_wider")
 }
 
 #' @export
 pivot_wider.data.frame <- function(data,
                                    id_cols = NULL,
+                                   id_expand = FALSE,
                                    names_from = name,
                                    names_prefix = "",
                                    names_sep = "_",
                                    names_glue = NULL,
                                    names_sort = FALSE,
+                                   names_vary = "fastest",
+                                   names_expand = FALSE,
                                    names_repair = "check_unique",
                                    values_from = value,
                                    values_fill = NULL,
                                    values_fn = NULL,
-                                   ...
-                                   ) {
+                                   unused_fn = NULL,
+                                   ...) {
   names_from <- enquo(names_from)
   values_from <- enquo(values_from)
-  spec <- build_wider_spec(data,
+
+  spec <- build_wider_spec(
+    data = data,
     names_from = !!names_from,
     values_from = !!values_from,
     names_prefix = names_prefix,
     names_sep = names_sep,
     names_glue = names_glue,
-    names_sort = names_sort
+    names_sort = names_sort,
+    names_vary = names_vary,
+    names_expand = names_expand
   )
 
-  id_cols <- enquo(id_cols)
-  pivot_wider_spec(data, spec, !!id_cols,
+  id_cols <- build_wider_id_cols_expr(
+    data = data,
+    id_cols = {{ id_cols }},
+    names_from = !!names_from,
+    values_from = !!values_from
+  )
+
+  pivot_wider_spec(
+    data = data,
+    spec = spec,
+    id_cols = !!id_cols,
+    id_expand = id_expand,
     names_repair = names_repair,
     values_fill = values_fill,
-    values_fn = values_fn
+    values_fn = values_fn,
+    unused_fn = unused_fn
   )
 }
 
@@ -158,6 +244,12 @@ pivot_wider.data.frame <- function(data,
 #'   pivoted from the wide format.
 #'   The special `.seq` variable is used to disambiguate rows internally;
 #'   it is automatically removed after pivotting.
+#' @param id_cols <[`tidy-select`][tidyr_tidy_select]> A set of columns that
+#'   uniquely identifies each observation. Defaults to all columns in `data`
+#'   except for the columns specified in `spec$.value` and the columns of the
+#'   `spec` that aren't named `.name` or `.value`. Typically used when you have
+#'   redundant variables, i.e. variables whose values are perfectly correlated
+#'   with existing variables.
 #'
 #' @examples
 #' # See vignette("pivot") for examples and explanation
@@ -186,98 +278,176 @@ pivot_wider.data.frame <- function(data,
 #' us_rent_income %>%
 #'   pivot_wider_spec(spec2)
 pivot_wider_spec <- function(data,
-                                  spec,
-                                  names_repair = "check_unique",
-                                  id_cols = NULL,
-                                  values_fill = NULL,
-                                  values_fn = NULL) {
-  spec <- check_spec(spec)
+                             spec,
+                             names_repair = "check_unique",
+                             id_cols = NULL,
+                             id_expand = FALSE,
+                             values_fill = NULL,
+                             values_fn = NULL,
+                             unused_fn = NULL) {
+  input <- data
 
-  if (is.function(values_fn)) {
-    values_fn <- rep_named(unique(spec$.value), list(values_fn))
-  }
-  if (!is.null(values_fn) && !is.list(values_fn)) {
-    abort("`values_fn` must be a NULL, a function, or a named list")
-  }
+  spec <- check_pivot_spec(spec)
 
+  names_from_cols <- names(spec)[-(1:2)]
+  values_from_cols <- vec_unique(spec$.value)
+
+  id_cols <- select_wider_id_cols(
+    data = data,
+    id_cols = {{ id_cols }},
+    names_from_cols = names_from_cols,
+    values_from_cols = values_from_cols
+  )
+
+  values_fn <- check_list_of_functions(values_fn, values_from_cols, "values_fn")
+
+  unused_cols <- setdiff(names(data), c(id_cols, names_from_cols, values_from_cols))
+  unused_fn <- check_list_of_functions(unused_fn, unused_cols, "unused_fn")
+  unused_cols <- names(unused_fn)
+
+  if (is.null(values_fill)) {
+    values_fill <- list()
+  }
   if (is_scalar(values_fill)) {
-    values_fill <- rep_named(unique(spec$.value), list(values_fill))
+    values_fill <- rep_named(values_from_cols, list(values_fill))
   }
-  if (!is.null(values_fill) && !is.list(values_fill)) {
+  if (!vec_is_list(values_fill)) {
     abort("`values_fill` must be NULL, a scalar, or a named list")
   }
+  values_fill <- values_fill[intersect(names(values_fill), values_from_cols)]
 
-  values <- vec_unique(spec$.value)
-  spec_cols <- c(names(spec)[-(1:2)], values)
-
-  id_cols <- enquo(id_cols)
-  if (!quo_is_null(id_cols)) {
-    key_vars <- names(tidyselect::eval_select(enquo(id_cols), data))
-  } else {
-    key_vars <- tbl_vars(data)
+  if (!is_bool(id_expand)) {
+    abort("`id_expand` must be a single `TRUE` or `FALSE`.")
   }
-  key_vars <- setdiff(key_vars, spec_cols)
+
+  # Early conversion to tibble because data.table returns zero rows if
+  # zero cols are selected. Also want to avoid the grouped-df behavior
+  # of `complete()`.
+  data <- as_tibble(data)
+  data <- data[vec_unique(c(id_cols, names_from_cols, values_from_cols, unused_cols))]
+
+  if (id_expand) {
+    data <- complete(data, !!!syms(id_cols), fill = values_fill, explicit = FALSE)
+  }
 
   # Figure out rows in output
-  df_rows <- data[key_vars]
-  if (ncol(df_rows) == 0) {
-    rows <- tibble(.rows = 1)
-    nrow <- 1L
-    # use `nrow(data)` here because data.table returns zero rows if no
-    # column is selected
-    row_id <- rep(1L, nrow(data))
-  } else {
-    row_id <- vec_group_id(df_rows)
-    nrow <- attr(row_id, "n")
-    rows <- vec_slice(df_rows, vec_unique_loc(row_id))
+  rows <- data[id_cols]
+  row_id <- vec_group_id(rows)
+  nrow <- attr(row_id, "n")
+  rows <- vec_slice(rows, vec_unique_loc(row_id))
+
+  n_unused_fn <- length(unused_fn)
+
+  unused <- vector("list", length = n_unused_fn)
+  names(unused) <- unused_cols
+
+  if (n_unused_fn > 0L) {
+    # This can be expensive, only compute if we are using `unused_fn`
+    unused_locs <- vec_group_loc(row_id)$loc
   }
+
+  for (i in seq_len(n_unused_fn)) {
+    unused_col <- unused_cols[[i]]
+    unused_fn_i <- unused_fn[[i]]
+
+    unused_value <- data[[unused_col]]
+
+    unused[[i]] <- value_summarize(
+      value = unused_value,
+      value_locs = unused_locs,
+      value_name = unused_col,
+      fn = unused_fn_i,
+      fn_name = "unused_fn"
+    )
+  }
+
+  unused <- tibble::new_tibble(unused, nrow = nrow)
+
+  duplicate_names <- character(0L)
 
   value_specs <- unname(split(spec, spec$.value))
   value_out <- vec_init(list(), length(value_specs))
 
   for (i in seq_along(value_out)) {
-    spec_i <- value_specs[[i]]
-    value <- spec_i$.value[[1]]
-    val <- data[[value]]
+    value_spec <- value_specs[[i]]
+    value_name <- value_spec$.value[[1]]
+    value <- data[[value_name]]
 
-    cols <- data[names(spec_i)[-(1:2)]]
-    col_id <- vec_match(as_tibble(cols), spec_i[-(1:2)])
-    val_id <- data.frame(row = row_id, col = col_id)
+    cols <- data[names(value_spec)[-(1:2)]]
+    col_id <- vec_match(as_tibble(cols), value_spec[-(1:2)])
+    value_id <- data.frame(row = row_id, col = col_id)
 
-    dedup <- vals_dedup(
-      key = val_id,
-      val = val,
-      value = value,
-      summarize = values_fn[[value]]
-    )
-    val_id <- dedup$key
-    val <- dedup$val
+    value_fn <- values_fn[[value_name]]
 
-    ncol <- nrow(spec_i)
+    if (is.null(value_fn) && vec_duplicate_any(value_id)) {
+      # There are unhandled duplicates. Handle them with `list()` and warn.
+      value_fn <- list
+      duplicate_names <- c(duplicate_names, value_name)
+    }
 
-    fill <- values_fill[[value]]
+    if (!is.null(value_fn)) {
+      result <- vec_group_loc(value_id)
+      value_id <- result$key
+      value_locs <- result$loc
+
+      value <- value_summarize(
+        value = value,
+        value_locs = value_locs,
+        value_name = value_name,
+        fn = value_fn,
+        fn_name = "values_fn"
+      )
+    }
+
+    ncol <- nrow(value_spec)
+
+    fill <- values_fill[[value_name]]
     if (is.null(fill)) {
-      out <- vec_init(val, nrow * ncol)
+      out <- vec_init(value, nrow * ncol)
     } else {
       stopifnot(vec_size(fill) == 1)
-      fill <- vec_cast(fill, val)
+      fill <- vec_cast(fill, value)
       out <- vec_rep_each(fill, nrow * ncol)
     }
-    vec_slice(out, val_id$row + nrow * (val_id$col - 1L)) <- val
+    out <- vec_assign(out, value_id$row + nrow * (value_id$col - 1L), value)
 
-    value_out[[i]] <- wrap_vec(out, spec_i$.name)
+    value_out[[i]] <- chop_rectangular_df(out, value_spec$.name)
   }
 
-  out <- wrap_error_names(vec_cbind(as_tibble(rows), !!!value_out, .name_repair = names_repair))
+  if (length(duplicate_names) > 0L) {
+    duplicate_names <- glue::backtick(duplicate_names)
+    duplicate_names <- glue::glue_collapse(duplicate_names, sep = ", ", last = " and ")
 
-  # recreate desired column order
-  # https://github.com/r-lib/vctrs/issues/227
-  if (all(spec$.name %in% names(out))) {
-    out <- out[c(names(rows), spec$.name)]
+    group_cols <- c(id_cols, names_from_cols)
+    group_cols <- backtick_if_not_syntactic(group_cols)
+    group_cols <- glue::glue_collapse(group_cols, sep = ", ")
+
+    warn(glue::glue(
+      "Values from {duplicate_names} are not uniquely identified; output will contain list-cols.\n",
+      "* Use `values_fn = list` to suppress this warning.\n",
+      "* Use `values_fn = {{summary_fun}}` to summarise duplicates.\n",
+      "* Use the following dplyr code to identify duplicates.\n",
+      "  {{data}} %>%\n",
+      "    dplyr::group_by({group_cols}) %>%\n",
+      "    dplyr::summarise(n = dplyr::n(), .groups = \"drop\") %>%\n",
+      "    dplyr::filter(n > 1L)"
+    ))
   }
 
-  reconstruct_tibble(data, out)
+  # `check_pivot_spec()` ensures `.name` is unique. Name repair shouldn't be needed.
+  values <- vec_cbind(!!!value_out, .name_repair = "minimal")
 
+  # Recreate desired column order of the new spec columns (#569)
+  values <- values[spec$.name]
+
+  out <- wrap_error_names(vec_cbind(
+    rows,
+    values,
+    unused,
+    .name_repair = names_repair
+  ))
+
+  reconstruct_tibble(input, out)
 }
 
 #' @export
@@ -289,30 +459,59 @@ build_wider_spec <- function(data,
                              names_prefix = "",
                              names_sep = "_",
                              names_glue = NULL,
-                             names_sort = FALSE
-                             ) {
+                             names_sort = FALSE,
+                             names_vary = "fastest",
+                             names_expand = FALSE) {
   names_from <- tidyselect::eval_select(enquo(names_from), data)
   values_from <- tidyselect::eval_select(enquo(values_from), data)
 
-  row_ids <- vec_unique(data[names_from])
-  if (names_sort) {
-    row_ids <- vec_sort(row_ids)
+  if (is_empty(names_from)) {
+    abort("`names_from` must select at least one column.")
+  }
+  if (is_empty(values_from)) {
+    abort("`values_from` must select at least one column.")
+  }
+
+  names_vary <- arg_match0(names_vary, c("fastest", "slowest"), arg_nm = "names_vary")
+
+  if (!is_bool(names_expand)) {
+    abort("`names_expand` must be a single `TRUE` or `FALSE`.")
+  }
+
+  data <- as_tibble(data)
+  data <- data[names_from]
+
+  if (names_expand) {
+    # `expand()` always does sort + unique
+    row_ids <- expand(data, !!!syms(names(data)))
+  } else {
+    row_ids <- vec_unique(data)
+
+    if (names_sort) {
+      row_ids <- vec_sort(row_ids)
+    }
   }
 
   row_names <- exec(paste, !!!row_ids, sep = names_sep)
 
   out <- tibble(
-    .name = paste0(names_prefix, row_names)
+    .name = vec_paste0(names_prefix, row_names)
   )
 
   if (length(values_from) == 1) {
     out$.value <- names(values_from)
   } else {
-    out <- vec_rep(out, vec_size(values_from))
-    out$.value <- vec_rep_each(names(values_from), vec_size(row_ids))
-    out$.name <- paste0(out$.value, names_sep, out$.name)
+    if (names_vary == "fastest") {
+      out <- vec_rep(out, vec_size(values_from))
+      out$.value <- vec_rep_each(names(values_from), vec_size(row_ids))
+      row_ids <- vec_rep(row_ids, vec_size(values_from))
+    } else {
+      out <- vec_rep_each(out, vec_size(values_from))
+      out$.value <- vec_rep(names(values_from), vec_size(row_ids))
+      row_ids <- vec_rep_each(row_ids, vec_size(values_from))
+    }
 
-    row_ids <- vec_rep(row_ids, vec_size(values_from))
+    out$.name <- vec_paste0(out$.value, names_sep, out$.name)
   }
 
   out <- vec_cbind(out, as_tibble(row_ids), .name_repair = "minimal")
@@ -323,48 +522,129 @@ build_wider_spec <- function(data,
   out
 }
 
-# quiet R CMD check
-name <- value <- NULL
+build_wider_id_cols_expr <- function(data,
+                                     id_cols = NULL,
+                                     names_from = name,
+                                     values_from = value) {
+  # TODO: Use `allow_rename = FALSE`.
+  # Requires https://github.com/r-lib/tidyselect/issues/225.
+  names_from_cols <- names(tidyselect::eval_select(enquo(names_from), data))
+  values_from_cols <- names(tidyselect::eval_select(enquo(values_from), data))
+
+  out <- select_wider_id_cols(
+    data = data,
+    id_cols = {{ id_cols }},
+    names_from_cols = names_from_cols,
+    values_from_cols = values_from_cols
+  )
+
+  expr(c(!!!out))
+}
+
+select_wider_id_cols <- function(data,
+                                 id_cols = NULL,
+                                 names_from_cols = character(),
+                                 values_from_cols = character()) {
+  id_cols <- enquo(id_cols)
+
+  # Remove known non-id-cols so they are never selected
+  data <- data[setdiff(names(data), c(names_from_cols, values_from_cols))]
+
+  if (quo_is_null(id_cols)) {
+    # Default selects everything in `data` after non-id-cols have been removed
+    return(names(data))
+  }
+
+  try_fetch(
+    # TODO: Use `allow_rename = FALSE`.
+    # Requires https://github.com/r-lib/tidyselect/issues/225.
+    id_cols <- tidyselect::eval_select(enquo(id_cols), data),
+    vctrs_error_subscript_oob = function(cnd) {
+      rethrow_id_cols_oob(cnd, names_from_cols, values_from_cols)
+    }
+  )
+
+  names(id_cols)
+}
+
+rethrow_id_cols_oob <- function(cnd, names_from_cols, values_from_cols) {
+  i <- cnd[["i"]]
+
+  if (!is_string(i)) {
+    abort("`i` is expected to be a string.", .internal = TRUE)
+  }
+
+  if (i %in% names_from_cols) {
+    stop_id_cols_oob(i, "names_from")
+  } else if (i %in% values_from_cols) {
+    stop_id_cols_oob(i, "values_from")
+  } else {
+    # Zap this special handler, throw the normal condition
+    zap()
+  }
+}
+
+stop_id_cols_oob <- function(i, arg) {
+  message <- c(
+    glue("`id_cols` can't select a column already selected by `{arg}`."),
+    i = glue("Column `{i}` has already been selected.")
+  )
+  abort(message, parent = NA)
+}
 
 # Helpers -----------------------------------------------------------------
 
-# Not a great name as it now also casts
-vals_dedup <- function(key, val, value, summarize = NULL) {
+value_summarize <- function(value, value_locs, value_name, fn, fn_name) {
+  value <- vec_chop(value, value_locs)
 
-  if (is.null(summarize)) {
-    if (!vec_duplicate_any(key)) {
-      return(list(key = key, val = val))
-    }
-
-    warn(glue::glue(
-      "Values are not uniquely identified; output will contain list-cols.\n",
-      "* Use `values_fn = list` to suppress this warning.\n",
-      "* Use `values_fn = length` to identify where the duplicates arise\n",
-      "* Use `values_fn = {{summary_fun}}` to summarise duplicates"
-    ))
+  if (identical(fn, list)) {
+    # The no-op case, for performance
+    return(value)
   }
 
-  out <- vec_split(val, key)
-  if (!is.null(summarize) && !identical(summarize, list)) {
-    summarize <- as_function(summarize)
-    # This is only correct if `values_fn` always returns a single value
-    # Needs https://github.com/r-lib/vctrs/issues/183
-    out$val <- vec_c(!!!map(out$val, summarize))
+  value <- map(value, fn)
+
+  sizes <- list_sizes(value)
+  invalid_sizes <- sizes != 1L
+
+  if (any(invalid_sizes)) {
+    size <- sizes[invalid_sizes][[1]]
+
+    header <- glue(
+      "Applying `{fn_name}` to `{value_name}` must result in ",
+      "a single summary value per key."
+    )
+    bullet <- c(
+      x = glue("Applying `{fn_name}` resulted in a value with length {size}.")
+    )
+
+    abort(c(header, bullet))
   }
 
-  out
+  value <- vec_c(!!!value)
+
+  value
 }
 
 # Wrap a "rectangular" vector into a data frame
-wrap_vec <- function(vec, names) {
-  ncol <- length(names)
-  nrow <- vec_size(vec) / ncol
-  out <- set_names(vec_init(list(), ncol), names)
-  for (i in 1:ncol) {
-    out[[i]] <- vec_slice(vec, ((i - 1) * nrow + 1):(i * nrow))
+chop_rectangular_df <- function(x, names) {
+  n_col <- vec_size(names)
+  n_row <- vec_size(x) / n_col
+
+  indices <- vector("list", n_col)
+
+  start <- 1L
+  stop <- n_row
+
+  for (i in seq_len(n_col)) {
+    indices[[i]] <- seq2(start, stop)
+    start <- start + n_row
+    stop <- stop + n_row
   }
 
-  as_tibble(out)
+  out <- vec_chop(x, indices)
+  names(out) <- names
+  tibble::new_tibble(out, nrow = n_row)
 }
 
 is_scalar <- function(x) {
@@ -372,9 +652,18 @@ is_scalar <- function(x) {
     return(FALSE)
   }
 
-  if (is.list(x)) {
-    (length(x) == 1) && !have_name(x)
+  if (vec_is_list(x)) {
+    (vec_size(x) == 1) && !have_name(x)
   } else {
-    length(x) == 1
+    vec_size(x) == 1
   }
+}
+
+backtick_if_not_syntactic <- function(x) {
+  ok <- make.names(x) == x
+  ok[is.na(x)] <- FALSE
+
+  x[!ok] <- glue::backtick(x[!ok])
+
+  x
 }

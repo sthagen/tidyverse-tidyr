@@ -1,8 +1,6 @@
 #' Chop and unchop
 #'
 #' @description
-#' `r lifecycle::badge("maturing")`
-#'
 #' Chopping and unchopping preserve the width of a data frame, changing its
 #' length. `chop()` makes `df` shorter by converting rows within each group
 #' into list-columns. `unchop()` makes `df` longer by expanding list-columns
@@ -14,7 +12,7 @@
 #' @details
 #' Generally, unchopping is more useful than chopping because it simplifies
 #' a complex data structure, and [nest()]ing is usually more appropriate
-#' that `chop()`ing` since it better preserves the connections between
+#' than `chop()`ing since it better preserves the connections between
 #' observations.
 #'
 #' `chop()` creates list-columns of class [vctrs::list_of()] to ensure
@@ -39,7 +37,8 @@
 #'   of missing values.
 #' @param ptype Optionally, a named list of column name-prototype pairs to
 #'   coerce `cols` to, overriding the default that will be guessed from
-#'   combining the individual values.
+#'   combining the individual values. Alternatively, a single empty ptype
+#'   can be supplied, which will be applied to all `cols`.
 #' @export
 #' @examples
 #' # Chop ==============================================================
@@ -67,35 +66,40 @@
 #' df %>% unchop(y)
 #' df %>% unchop(y, keep_empty = TRUE)
 chop <- function(data, cols) {
-  if (missing(cols)) {
-    return(data)
-  }
-
+  check_required(cols)
+  # TODO: `allow_rename = FALSE`
   cols <- tidyselect::eval_select(enquo(cols), data)
 
-  vals <- data[cols]
+  cols <- tidyr_new_list(data[cols])
   keys <- data[setdiff(names(data), names(cols))]
-  split <- vec_split(vals, keys)
 
-  if (length(split$val)) {
-    split_vals <- transpose(split$val)
-    vals <- map2(split_vals, vec_ptype(vals), new_list_of)
-    vals <- new_data_frame(vals)
-  }
+  info <- vec_group_loc(keys)
+  keys <- info$key
+  indices <- info$loc
 
-  out <- vec_cbind(split$key, vals)
+  size <- vec_size(keys)
+
+  cols <- map(cols, col_chop, indices = indices)
+  cols <- new_data_frame(cols, n = size)
+
+  out <- vec_cbind(keys, cols)
+
   reconstruct_tibble(data, out)
+}
+
+col_chop <- function(x, indices) {
+  ptype <- vec_ptype(x)
+
+  out <- vec_chop(x, indices)
+  out <- new_list_of(out, ptype)
+
+  out
 }
 
 #' @export
 #' @rdname chop
 unchop <- function(data, cols, keep_empty = FALSE, ptype = NULL) {
   sel <- tidyselect::eval_select(enquo(cols), data)
-
-  if (is_null(ptype)) {
-    # Convert to form that `df_unchop()` requires
-    ptype <- list()
-  }
 
   size <- vec_size(data)
   names <- names(data)
@@ -137,18 +141,17 @@ unchop <- function(data, cols, keep_empty = FALSE, ptype = NULL) {
 #   used to slice the data frame `x` was subset from to align it with `val`.
 # - `val` the unchopped data frame.
 
-df_unchop <- function(x, ..., ptype = list(), keep_empty = FALSE) {
-  ellipsis::check_dots_empty()
+df_unchop <- function(x, ..., ptype = NULL, keep_empty = FALSE) {
+  check_dots_empty()
 
   if (!is.data.frame(x)) {
     abort("`x` must be a data frame.")
   }
-  if (!is_list(ptype)) {
-    abort("`ptype` must be a list.")
-  }
   if (!is_bool(keep_empty)) {
     abort("`keep_empty` must be a single `TRUE` or `FALSE`.")
   }
+
+  ptype <- check_list_of_ptypes(ptype, names = names(x), arg = "ptype")
 
   size <- vec_size(x)
 
@@ -184,9 +187,16 @@ df_unchop <- function(x, ..., ptype = list(), keep_empty = FALSE) {
       next
     }
 
-    info <- unchop_col_info(col, keep_empty)
+    # Always replace `NULL` elements with size 1 missing equivalent for recycling.
+    # These will be reset to `NULL` in `unchop_finalize()` if the
+    # entire row was missing and `keep_empty = FALSE`.
+    info <- list_init_empty(
+      x = col,
+      null = TRUE,
+      typed = keep_empty
+    )
 
-    x[[i]] <- info$col
+    x[[i]] <- info$x
     x_sizes[[i]] <- info$sizes
     x_nulls[[i]] <- info$null
   }
@@ -204,15 +214,20 @@ df_unchop <- function(x, ..., ptype = list(), keep_empty = FALSE) {
 
   for (i in seq_len_width) {
     col <- x[[i]]
+    col_name <- names[[i]]
     col_is_list <- x_is_list[[i]]
 
+    col_ptype <- ptype[[col_name]]
+
     if (!col_is_list) {
+      if (!is_null(col_ptype)) {
+        col <- vec_cast(col, col_ptype, x_arg = col_name)
+      }
       out_cols[[i]] <- vec_slice(col, out_loc)
       next
     }
 
-    col_name <- names[[i]]
-    col_ptype <- ptype[[col_name]] %||% attr(col, "ptype", exact = TRUE)
+    col_ptype <- col_ptype %||% attr(col, "ptype", exact = TRUE)
 
     # Drop to a bare list to avoid dispatch
     col <- unclass(col)
@@ -247,53 +262,6 @@ df_unchop <- function(x, ..., ptype = list(), keep_empty = FALSE) {
   out <- new_data_frame(out, n = out_size)
 
   out
-}
-
-unchop_col_info <- function(col, keep_empty) {
-  sizes <- list_sizes(col)
-  null <- vec_equal_na(col)
-
-  ptype <- attr(col, "ptype", exact = TRUE)
-
-  if (any(null)) {
-    # Always replace `NULL` elements with size 1 missing equivalent for recycling.
-    # These will be reset to `NULL` in `unchop_finalize()` if the
-    # entire row was missing and `keep_empty = FALSE`.
-
-    if (is_null(ptype)) {
-      replacement <- list(unspecified(1L))
-    } else {
-      replacement <- list(vec_init(ptype, n = 1L))
-      replacement <- new_list_of(replacement, ptype = ptype)
-    }
-
-    col <- vec_assign(col, null, replacement)
-    sizes[null] <- 1L
-  }
-
-  if (keep_empty) {
-    # Remember, `NULL` elements are already handled above, so `sizes == 0L`
-    # will now only happen with typed empty elements.
-    empty_typed <- sizes == 0L
-
-    if (any(empty_typed)) {
-      # Replace empty typed elements with their size 1 equivalent
-
-      if (is_null(ptype)) {
-        # `vec_init()` is slow, see r-lib/vctrs#1423, so use `vec_slice()` equivalent
-        replacement <- map(vec_slice(col, empty_typed), vec_slice, i = NA_integer_)
-      } else {
-        # For list-of, all size elements are the same type
-        replacement <- list(vec_init(ptype, n = 1L))
-        replacement <- new_list_of(replacement, ptype = ptype)
-      }
-
-      col <- vec_assign(col, empty_typed, replacement)
-      sizes[empty_typed] <- 1L
-    }
-  }
-
-  list(col = col, sizes = sizes, null = null)
 }
 
 unchop_sizes2 <- function(x, y) {

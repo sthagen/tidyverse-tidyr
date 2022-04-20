@@ -22,14 +22,15 @@ extract(
 \code{\link[tidyselect:vars_pull]{tidyselect::vars_pull()}}.
 
 This argument is passed by expression and supports
-\link[rlang:nse-force]{quasiquotation} (you can unquote column
+\link[rlang:topic-inject]{quasiquotation} (you can unquote column
 names or column positions).}
 
 \item{into}{Names of new variables to create as character vector.
 Use \code{NA} to omit the variable in the output.}
 
-\item{regex}{a regular expression used to extract the desired values.
-There should be one group (defined by \verb{()}) for each element of \code{into}.}
+\item{regex}{A string representing a regular expression used to extract the
+desired values. There should be one group (defined by \verb{()}) for each
+element of \code{into}.}
 
 \item{remove}{If \code{TRUE}, remove input column from output data frame.}
 

@@ -34,7 +34,7 @@ test_that("extract keeps characters as character", {
 
 test_that("can combine into multiple columns", {
   df <- tibble(x = "abcd")
-  out <- extract(df, x, c("a", "b", "a" , "b"), "(.)(.)(.)(.)", convert = TRUE)
+  out <- extract(df, x, c("a", "b", "a", "b"), "(.)(.)(.)(.)", convert = TRUE)
   expect_equal(out, tibble(a = "ac", b = "bd"))
 })
 
@@ -47,8 +47,17 @@ test_that("groups are preserved", {
 
 test_that("informative error message if wrong number of groups", {
   df <- tibble(x = "a")
-  expect_error(extract(df, x, "y", "."), "should define 1 groups")
-  expect_error(extract(df, x, c("y", "z"), "."), "should define 2 groups")
+  expect_snapshot({
+    (expect_error(extract(df, x, "y", ".")))
+    (expect_error(extract(df, x, c("y", "z"), ".")))
+  })
+})
+
+test_that("informative error if using stringr modifier functions (#693)", {
+  df <- tibble(x = "a")
+  regex <- structure("a", class = "pattern")
+
+  expect_snapshot((expect_error(extract(df, x, "x", regex = regex))))
 })
 
 test_that("str_match_first handles edge cases", {

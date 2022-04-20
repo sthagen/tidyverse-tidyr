@@ -23,10 +23,10 @@ test_that("missings are filled correctly", {
   out <- fill(df, x, .direction = "up")
   expect_equal(out$x, c(1, 1, 2, 2, NA, NA))
 
-  out <- fill(df, x, .direction = 'downup')
+  out <- fill(df, x, .direction = "downup")
   expect_equal(out$x, c(1, 1, 1, 2, 2, 2))
 
-  out <- fill(df, x, .direction = 'updown')
+  out <- fill(df, x, .direction = "updown")
   expect_equal(out$x, c(1, 1, 2, 2, 2, 2))
 })
 
@@ -64,6 +64,38 @@ test_that("missings filled up for each vector", {
   expect_equal(out$lst, list(1:5, 1:5))
 })
 
+test_that("NaN is treated as missing (#982)", {
+  df <- tibble(x = c(1, NaN, 2))
+
+  out <- fill(df, x)
+  expect_identical(out$x, c(1, 1, 2))
+
+  out <- fill(df, x, .direction = "up")
+  expect_identical(out$x, c(1, 2, 2))
+})
+
+test_that("can fill rcrd types", {
+  col <- new_rcrd(list(x = c(1, NA, NA), y = c("x", NA, "y")))
+  df <- tibble(x = col)
+
+  out <- fill(df, x)
+  expect_identical(field(out$x, "x"), c(1, 1, NA))
+  expect_identical(field(out$x, "y"), c("x", "x", "y"))
+})
+
+test_that("can fill df-cols", {
+  # Uses vctrs missingness rules, so partially missing rows aren't filled
+  df <- tibble(x = tibble(a = c(1, NA, NA), b = c("x", NA, "y")))
+
+  out <- fill(df, x)
+  expect_identical(out$x$a, c(1, 1, NA))
+  expect_identical(out$x$b, c("x", "x", "y"))
+
+  out <- fill(df, x, .direction = "up")
+  expect_identical(out$x$a, c(1, NA, NA))
+  expect_identical(out$x$b, c("x", "y", "y"))
+})
+
 test_that("fill preserves attributes", {
   df <- tibble(x = factor(c(NA, "a", NA)))
 
@@ -76,6 +108,14 @@ test_that("fill preserves attributes", {
 
 test_that("fill respects grouping", {
   df <- tibble(x = c(1, 1, 2), y = c(1, NA, NA))
-  out <- df %>% dplyr::group_by(x) %>% fill(y)
+  out <- df %>%
+    dplyr::group_by(x) %>%
+    fill(y)
   expect_equal(out$y, c(1, 1, NA))
+})
+
+test_that("works when there is a column named `.direction` in the data (#1319)", {
+  df <- tibble(x = c(1, NA, 2), .direction = 1:3)
+  expect_error(out <- fill(df, x), NA)
+  expect_identical(out$x, c(1, 1, 2))
 })

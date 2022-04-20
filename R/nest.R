@@ -50,12 +50,12 @@
 #'   as is. In `nest()`, inner names will come from the former outer names;
 #'   in `unnest()`, the new outer names will come from the inner names.
 #'
-#'   If a string, the inner and outer names will be used together. In `nest()`,
-#'   the names of the new outer columns will be formed by pasting together the
-#'   outer and the inner column names, separated by `names_sep`. In `unnest()`,
-#'   the new inner names will have the outer names (+ `names_sep`) automatically
-#'   stripped. This makes `names_sep` roughly symmetric between nesting and
-#'   unnesting.
+#'   If a string, the inner and outer names will be used together. In
+#'   `unnest()`, the names of the new outer columns will be formed by pasting
+#'   together the outer and the inner column names, separated by `names_sep`. In
+#'   `nest()`, the new inner names will have the outer names + `names_sep`
+#'   automatically stripped. This makes `names_sep` roughly symmetric between
+#'   nesting and unnesting.
 #' @param .key
 #'   `r lifecycle::badge("deprecated")`:
 #'   No longer needed because of the new `new_col = c(col1, col2,
@@ -109,9 +109,9 @@
 #'
 #' #' # You can unnest multiple columns simultaneously
 #' df <- tibble(
-#'  a = list(c("a", "b"), "c"),
-#'  b = list(1:2, 3),
-#'  c = c(11, 22)
+#'   a = list(c("a", "b"), "c"),
+#'   b = list(1:2, 3),
+#'   c = c(11, 22)
 #' )
 #' df %>% unnest(c(a, b))
 #'
@@ -121,15 +121,28 @@
 nest <- function(.data, ..., .names_sep = NULL, .key = deprecated()) {
   cols <- enquos(...)
 
-  if (any(names2(cols) == "")) {
-    col_names <- names(tidyselect::eval_select(expr(c(...)), .data))
-    cols_expr <- expr(c(!!!syms(col_names)))
+  empty <- names2(cols) == ""
+  if (any(empty)) {
+    cols_good <- cols[!empty]
+    cols_bad <- cols[empty]
+
     .key <- if (missing(.key)) "data" else as.character(ensym(.key))
-    cols <- quos(!!.key := !!cols_expr)
+
+    if (length(cols_bad) == 1L) {
+      cols_bad <- cols_bad[[1]]
+      cols_fixed_expr <- expr(!!cols_bad)
+    } else {
+      cols_fixed_expr <- expr(c(!!!cols_bad))
+    }
+
+    cols_fixed_label <- as_label(cols_fixed_expr)
+    cols_fixed <- quos(!!.key := !!cols_fixed_expr)
+
+    cols <- c(cols_good, cols_fixed)
 
     warn(paste0(
       "All elements of `...` must be named.\n",
-      "Did you want `", .key, " = ", expr_text(cols_expr), "`?"
+      "Did you want `", .key, " = ", cols_fixed_label, "`?"
     ))
 
     return(nest(.data, !!!cols))
@@ -146,7 +159,7 @@ nest.data.frame <- function(.data, ..., .names_sep = NULL, .key = deprecated()) 
     .data <- as_tibble(.data)
   }
 
-  nest.tbl_df(.data, ..., .key = .key)
+  nest.tbl_df(.data, ..., .names_sep = .names_sep, .key = .key)
 }
 
 #' @export
@@ -157,45 +170,31 @@ nest.tbl_df <- function(.data, ..., .names_sep = NULL, .key = deprecated()) {
       "`...` must not be empty for ungrouped data frames.\n",
       "Did you want `", .key, " = everything()`?"
     ))
-    cols <- list2(!!.key := names(.data))
+    cols <- quos(!!.key := everything())
   } else {
     cols <- enquos(...)
-    cols <- map(cols, ~ names(tidyselect::eval_select(.x, .data)))
   }
 
-  cols <- map(cols, set_names)
-  if (!is.null(.names_sep)) {
-    cols <- imap(cols, strip_names, .names_sep)
+  out <- pack(.data, !!!cols, .names_sep = .names_sep)
+  out <- chop(out, cols = all_of(names(cols)))
+
+  # `nest()` currently doesn't return list-of columns
+  for (name in names(cols)) {
+    out[[name]] <- tidyr_new_list(out[[name]])
   }
 
-  asis <- setdiff(names(.data), unlist(cols))
-  keys <- .data[asis]
-  u_keys <- vec_unique(keys)
-
-  # Only rename if needed: many packages implement "sticky" columns
-  # (e.g. https://github.com/jacob-long/panelr/issues/28) which causes
-  # set_names() to fail.
-  if (is.null(.names_sep)) {
-    out <- map(cols, ~ vec_split(.data[.x], keys)$val)
-  } else {
-    out <- map(cols, ~ vec_split(set_names(.data[.x], names(.x)), keys)$val)
-  }
-
-  vec_cbind(u_keys, new_data_frame(out, n = nrow(u_keys)))
+  out
 }
 
 #' @export
 nest.grouped_df <- function(.data, ..., .names_sep = NULL, .key = deprecated()) {
   if (missing(...)) {
     .key <- check_key(.key)
-    nest_vars <- setdiff(names(.data), dplyr::group_vars(.data))
-    out <- nest.tbl_df(.data, !!.key := any_of(nest_vars), .names_sep = .names_sep)
+    cols <- setdiff(names(.data), dplyr::group_vars(.data))
+    nest.tbl_df(.data, !!.key := all_of(cols), .names_sep = .names_sep)
   } else {
-    out <- NextMethod()
+    NextMethod()
   }
-  group_vars <- intersect(names(out), dplyr::group_vars(.data))
-
-  dplyr::grouped_df(out, group_vars)
 }
 
 check_key <- function(.key) {
@@ -241,7 +240,6 @@ unnest <- function(data,
                    .id = deprecated(),
                    .sep = deprecated(),
                    .preserve = deprecated()) {
-
   deprecated <- FALSE
   if (!missing(.preserve)) {
     lifecycle::deprecate_warn("1.0.0", "unnest(.preserve = )",
@@ -317,8 +315,7 @@ unnest <- function(data,
 }
 
 #' @export
-unnest.data.frame <- function(
-                              data,
+unnest.data.frame <- function(data,
                               cols,
                               ...,
                               keep_empty = FALSE,
@@ -331,22 +328,18 @@ unnest.data.frame <- function(
                               .preserve = "DEPRECATED") {
   cols <- tidyselect::eval_select(enquo(cols), data)
   data <- unchop(data, any_of(cols), keep_empty = keep_empty, ptype = ptype)
-  cols <- cols[map_lgl(unclass(data)[cols], is.data.frame)]
   unpack(data, any_of(cols), names_sep = names_sep, names_repair = names_repair)
 }
 
 
 #' @export
-unnest.rowwise_df <- function(
-                              data,
+unnest.rowwise_df <- function(data,
                               cols,
                               ...,
                               keep_empty = FALSE,
                               ptype = NULL,
                               names_sep = NULL,
-                              names_repair = "check_unique"
-                              ) {
-
+                              names_repair = "check_unique") {
   out <- unnest.data.frame(as_tibble(data), {{ cols }},
     keep_empty = keep_empty,
     ptype = ptype,

@@ -32,12 +32,12 @@
 #'   separate(xy, c("x", "y"))
 #' # (but note `x` and `y` contain now "NA" not NA)
 unite <- function(data, col, ..., sep = "_", remove = TRUE, na.rm = FALSE) {
-  ellipsis::check_dots_unnamed()
+  check_dots_unnamed()
   UseMethod("unite")
 }
 #' @export
 unite.data.frame <- function(data, col, ..., sep = "_", remove = TRUE, na.rm = FALSE) {
-  var <- as_string(ensym2(col))
+  var <- as_string(ensym(col))
 
   if (dots_n(...) == 0) {
     from_vars <- set_names(seq_along(data), names(data))

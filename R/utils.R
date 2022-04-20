@@ -32,22 +32,6 @@ imap <- function(.x, .f, ...) {
 seq_nrow <- function(x) seq_len(nrow(x))
 seq_ncol <- function(x) seq_len(ncol(x))
 
-# Until https://github.com/r-lib/rlang/issues/675 is fixed
-ensym2 <- function(arg) {
-  arg <- ensym(arg)
-
-  expr <- eval_bare(expr(enquo(!!arg)), caller_env())
-  expr <- quo_get_expr(expr)
-
-  if (is_string(expr)) {
-    sym(expr)
-  } else if (is_symbol(expr)) {
-    expr
-  } else {
-    abort("Must supply a symbol or a string as argument")
-  }
-}
-
 last <- function(x) x[[length(x)]]
 
 
@@ -68,7 +52,9 @@ last <- function(x) x[[length(x)]]
 #'
 #' # Doesn't work because it would produce a data frame with two
 #' # columns called x
-#' \dontrun{unnest(df, y)}
+#' \dontrun{
+#' unnest(df, y)
+#' }
 #'
 #' # The new tidyverse standard:
 #' unnest(df, y, names_repair = "universal")
@@ -76,7 +62,9 @@ last <- function(x) x[[length(x)]]
 #' # The old tidyr approach
 #' unnest(df, y, names_repair = tidyr_legacy)
 tidyr_legacy <- function(nms, prefix = "V", sep = "") {
-  if (length(nms) == 0) return(character())
+  if (length(nms) == 0) {
+    return(character())
+  }
   blank <- nms == ""
   nms[!blank] <- make.unique(nms[!blank], sep = sep)
   new_nms <- setdiff(paste(prefix, seq_along(nms), sep = sep), nms)
@@ -98,7 +86,7 @@ tidyr_col_modify <- function(data, cols) {
   }
 
   size <- vec_size(data)
-  attributes(data) <- list(names = names(data))
+  data <- tidyr_new_list(data)
 
   names <- names(cols)
 
@@ -114,10 +102,145 @@ tidyr_col_modify <- function(data, cols) {
   data
 }
 
-check_present <- function(x) {
-  arg <- ensym(x)
-  if (missing(x)) {
-    abort(paste0("Argument `", arg, "` is missing with no default"))
+tidyr_new_list <- function(x) {
+  if (!is_list(x)) {
+    abort("Internal error: `x` must be a VECSXP.")
   }
 
+  names <- names(x)
+
+  if (is.null(names)) {
+    attributes(x) <- NULL
+  } else {
+    attributes(x) <- list(names = names)
+  }
+
+  x
+}
+
+# "Initializes" empty values to their size 1 equivalent
+# - Can initialize `NULL` to either `unspecified(1)` or a list-of ptype
+# - Can initialize typed empty elements to `vec_init(x, 1L)` or a list-of ptype
+# Returns a list containing:
+# - Updated `x`
+# - `sizes`, an integer vector containing updated sizes for the elements of `x`
+# - `null`, a logical vector indicating the original `NULL` values
+# - `typed`, a logical vector indicating the original empty typed values
+list_init_empty <- function(x,
+                            ...,
+                            null = TRUE,
+                            typed = TRUE) {
+  check_dots_empty()
+
+  if (!vec_is_list(x)) {
+    abort("Internal error: `x` must be a list.")
+  }
+
+  sizes <- list_sizes(x)
+  empty_null <- vec_equal_na(x)
+  empty_typed <- (sizes == 0L) & !empty_null
+
+  if (null && any(empty_null)) {
+    # Replace `NULL` elements with their size 1 equivalent
+
+    if (is_list_of(x)) {
+      ptype <- list_of_ptype(x)
+      replacement <- list(vec_init(ptype, n = 1L))
+      replacement <- new_list_of(replacement, ptype = ptype)
+    } else {
+      replacement <- list(unspecified(1L))
+    }
+
+    x <- vec_assign(x, empty_null, replacement)
+    sizes[empty_null] <- 1L
+  }
+
+  if (typed && any(empty_typed)) {
+    # Replace empty typed elements with their size 1 equivalent
+
+    if (is_list_of(x)) {
+      ptype <- list_of_ptype(x)
+      replacement <- list(vec_init(ptype, n = 1L))
+      replacement <- new_list_of(replacement, ptype = ptype)
+    } else {
+      replacement <- map(vec_slice(x, empty_typed), vec_init)
+    }
+
+    x <- vec_assign(x, empty_typed, replacement)
+    sizes[empty_typed] <- 1L
+  }
+
+  list(x = x, sizes = sizes, null = empty_null, typed = empty_typed)
+}
+
+list_of_ptype <- function(x) {
+  ptype <- attr(x, "ptype", exact = TRUE)
+
+  # ptypes should always be unnamed, but this isn't guaranteed right now.
+  # See https://github.com/r-lib/vctrs/pull/1020#discussion_r411327472
+  ptype <- vec_set_names(ptype, NULL)
+
+  ptype
+}
+
+apply_names_sep <- function(outer, inner, names_sep) {
+  as.character(glue("{outer}{names_sep}{inner}"))
+}
+
+vec_paste0 <- function(...) {
+  # Use tidyverse recycling rules to avoid size zero recycling bugs
+  args <- vec_recycle_common(...)
+  exec(paste0, !!!args)
+}
+
+check_list_of_ptypes <- function(x, names, arg) {
+  if (vec_is(x) && vec_is_empty(x)) {
+    x <- rep_named(names, list(x))
+  }
+
+  if (is.null(x)) {
+    x <- set_names(list(), character())
+  }
+
+  if (!vec_is_list(x)) {
+    abort(glue("`{arg}` must be `NULL`, an empty ptype, or a named list of ptypes."))
+  }
+
+  if (length(x) > 0L && !is_named(x)) {
+    abort(glue("All elements of `{arg}` must be named."))
+  }
+
+  if (vec_duplicate_any(names(x))) {
+    abort(glue("The names of `{arg}` must be unique."))
+  }
+
+  # Silently drop user supplied names not found in the data
+  x <- x[intersect(names(x), names)]
+
+  x
+}
+
+check_list_of_functions <- function(x, names, arg) {
+  if (is.null(x)) {
+    x <- set_names(list(), character())
+  }
+
+  if (!vec_is_list(x)) {
+    x <- rep_named(names, list(x))
+  }
+
+  if (length(x) > 0L && !is_named(x)) {
+    abort(glue("All elements of `{arg}` must be named."))
+  }
+
+  if (vec_duplicate_any(names(x))) {
+    abort(glue("The names of `{arg}` must be unique."))
+  }
+
+  x <- map(x, as_function)
+
+  # Silently drop user supplied names not found in the data
+  x <- x[intersect(names(x), names)]
+
+  x
 }

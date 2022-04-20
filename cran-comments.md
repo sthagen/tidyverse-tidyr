@@ -1,31 +1,40 @@
-## Test environments
-
-* OS X install: R 3.5
-* win-builder: R-devel
-* travis-ci: R 3.1, R 3.2, R 3.3, R 3.4, R-devel
-
-## R CMD check results
-
-0 errors | 0 warnings | 0 notes
-
 ## revdepcheck results
 
-We checked 1142 reverse dependencies, comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1451 reverse dependencies (1441 from CRAN + 10 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 0 new problems
- * We failed to check 10 packages
+ * We saw 7 new problems
+ * We failed to check 3 packages
 
 Issues with CRAN packages are summarised below.
 
+### New problems
+(This reports the first line of each new failure)
+
+* covidregionaldata
+  checking tests ... ERROR
+  checking re-building of vignette outputs ... WARNING
+
+* emayili
+  checking examples ... ERROR
+  checking tests ... ERROR
+
+* simpr
+  checking S3 generic/method consistency ... WARNING
+
+* skater
+  checking re-building of vignette outputs ... WARNING
+
+* sparklyr
+  checking S3 generic/method consistency ... WARNING
+
+* SWMPrExtension
+  checking examples ... ERROR
+
+* xml2relational
+  checking examples ... ERROR
+
 ### Failed to check
 
-* CB2            (NA)
-* diceR          (NA)
-* dimRed         (NA)
-* EpiNow2        (NA)
-* ggmsa          (NA)
-* MarketMatching (NA)
-* metagam        (NA)
-* multinma       (NA)
-* rmdcev         (NA)
-* wrswoR         (NA)
+* loon.ggplot (NA)
+* PLNmodels   (NA)
+* vivid       (NA)

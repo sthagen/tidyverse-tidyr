@@ -26,7 +26,9 @@ test_that("can control output column name", {
 
 test_that("nest doesn't include grouping vars in nested data", {
   df <- tibble(x = c(1, 1, 1), y = 1:3)
-  out <- df %>% dplyr::group_by(x) %>% nest_legacy()
+  out <- df %>%
+    dplyr::group_by(x) %>%
+    nest_legacy()
   expect_equal(out$data[[1]], tibble(y = 1:3))
 })
 
@@ -131,7 +133,7 @@ test_that("can unnest mixture of name and unnamed lists of same length", {
     y = list(y = 1:2),
     z = list(1:2)
   )
-  expect_identical(unnest_legacy(df), tibble(x = c("a","a"), y = c(1:2), z = c(1:2)))
+  expect_identical(unnest_legacy(df), tibble(x = c("a", "a"), y = c(1:2), z = c(1:2)))
 })
 
 test_that("elements must all be of same type", {
@@ -141,15 +143,15 @@ test_that("elements must all be of same type", {
 
 test_that("can't combine vectors and data frames", {
   df <- tibble(x = list(1, tibble(1)))
-  expect_error(unnest_legacy(df), "a list of vectors or a list of data frames")
+  expect_snapshot((expect_error(unnest_legacy(df))))
 })
 
 test_that("multiple columns must be same length", {
   df <- tibble(x = list(1), y = list(1:2))
-  expect_error(unnest_legacy(df), "same number of elements")
+  expect_snapshot((expect_error(unnest_legacy(df))))
 
   df <- tibble(x = list(1), y = list(tibble(x = 1:2)))
-  expect_error(unnest_legacy(df), "same number of elements")
+  expect_snapshot((expect_error(unnest_legacy(df))))
 })
 
 test_that("nested is split as a list (#84)", {

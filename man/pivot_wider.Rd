@@ -7,15 +7,19 @@
 pivot_wider(
   data,
   id_cols = NULL,
+  id_expand = FALSE,
   names_from = name,
   names_prefix = "",
   names_sep = "_",
   names_glue = NULL,
   names_sort = FALSE,
+  names_vary = "fastest",
+  names_expand = FALSE,
   names_repair = "check_unique",
   values_from = value,
   values_fill = NULL,
   values_fn = NULL,
+  unused_fn = NULL,
   ...
 )
 }
@@ -23,10 +27,21 @@ pivot_wider(
 \item{data}{A data frame to pivot.}
 
 \item{id_cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A set of columns that
-uniquely identifies each observation. Defaults to all columns in \code{data}
-except for the columns specified in \code{names_from} and \code{values_from}.
-Typically used when you have redundant variables, i.e. variables whose
-values are perfectly correlated with existing variables.}
+uniquely identify each observation. Typically used when you have
+redundant variables, i.e. variables whose values are perfectly correlated
+with existing variables.
+
+Defaults to all columns in \code{data} except for the columns specified through
+\code{names_from} and \code{values_from}. If a tidyselect expression is supplied, it
+will be evaluated on \code{data} after removing the columns specified through
+\code{names_from} and \code{values_from}.}
+
+\item{id_expand}{Should the values in the \code{id_cols} columns be expanded by
+\code{\link[=expand]{expand()}} before pivoting? This results in more rows, the output will
+contain a complete expansion of all possible values in \code{id_cols}. Implicit
+factor levels that aren't represented in the data will become explicit.
+Additionally, the row values corresponding to the expanded \code{id_cols} will
+be sorted.}
 
 \item{names_from, values_from}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A pair of
 arguments describing which column (or columns) to get the name of the
@@ -51,6 +66,23 @@ a glue specification that uses the \code{names_from} columns (and special
 \item{names_sort}{Should the column names be sorted? If \code{FALSE}, the default,
 column names are ordered by first appearance.}
 
+\item{names_vary}{When \code{names_from} identifies a column (or columns) with
+multiple unique values, and multiple \code{values_from} columns are provided,
+in what order should the resulting column names be combined?
+\itemize{
+\item \code{"fastest"} varies \code{names_from} values fastest, resulting in a column
+naming scheme of the form: \verb{value1_name1, value1_name2, value2_name1, value2_name2}. This is the default.
+\item \code{"slowest"} varies \code{names_from} values slowest, resulting in a column
+naming scheme of the form: \verb{value1_name1, value2_name1, value1_name2, value2_name2}.
+}}
+
+\item{names_expand}{Should the values in the \code{names_from} columns be expanded
+by \code{\link[=expand]{expand()}} before pivoting? This results in more columns, the output
+will contain column names corresponding to a complete expansion of all
+possible values in \code{names_from}. Implicit factor levels that aren't
+represented in the data will become explicit. Additionally, the column
+names will be sorted, identical to what \code{names_sort} would produce.}
+
 \item{names_repair}{What happens if the output has invalid column names?
 The default, \code{"check_unique"} is to error if the columns are duplicated.
 Use \code{"minimal"} to allow duplicates in the output, or \code{"unique"} to
@@ -60,15 +92,31 @@ for more options.}
 \item{values_fill}{Optionally, a (scalar) value that specifies what each
 \code{value} should be filled in with when missing.
 
-This can be a named list if you want to apply different aggregations
-to different value columns.}
+This can be a named list if you want to apply different fill values to
+different value columns.}
 
-\item{values_fn}{Optionally, a function applied to the \code{value} in each cell
+\item{values_fn}{Optionally, a function applied to the value in each cell
 in the output. You will typically use this when the combination of
-\code{id_cols} and \code{value} column does not uniquely identify an observation.
+\code{id_cols} and \code{names_from} columns does not uniquely identify an
+observation.
 
 This can be a named list if you want to apply different aggregations
-to different value columns.}
+to different \code{values_from} columns.}
+
+\item{unused_fn}{Optionally, a function applied to summarize the values from
+the unused columns (i.e. columns not identified by \code{id_cols},
+\code{names_from}, or \code{values_from}).
+
+The default drops all unused columns from the result.
+
+This can be a named list if you want to apply different aggregations
+to different unused columns.
+
+\code{id_cols} must be supplied for \code{unused_fn} to be useful, since otherwise
+all unspecified columns will be considered \code{id_cols}.
+
+This is similar to grouping by the \code{id_cols} then summarizing the
+unused columns using \code{unused_fn}.}
 
 \item{...}{Additional arguments passed on to methods.}
 }
@@ -98,7 +146,19 @@ fish_encounters \%>\%
 # Generate column names from multiple variables
 us_rent_income
 us_rent_income \%>\%
-  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+  pivot_wider(
+    names_from = variable,
+    values_from = c(estimate, moe)
+  )
+
+# You can control whether `names_from` values vary fastest or slowest
+# relative to the `values_from` column names using `names_vary`.
+us_rent_income \%>\%
+  pivot_wider(
+    names_from = variable,
+    values_from = c(estimate, moe),
+    names_vary = "slowest"
+  )
 
 # When there are multiple `names_from` or `values_from`, you can use
 # use `names_sep` or `names_glue` to control the output variable names
@@ -115,7 +175,7 @@ us_rent_income \%>\%
     values_from = c(estimate, moe)
   )
 
-# Can perform aggregation with values_fn
+# Can perform aggregation with `values_fn`
 warpbreaks <- as_tibble(warpbreaks[c("wool", "tension", "breaks")])
 warpbreaks
 warpbreaks \%>\%
@@ -123,6 +183,16 @@ warpbreaks \%>\%
     names_from = wool,
     values_from = breaks,
     values_fn = mean
+  )
+
+# Can pass an anonymous function to `values_fn` when you
+# need to supply additional arguments
+warpbreaks$breaks[1] <- NA
+warpbreaks \%>\%
+  pivot_wider(
+    names_from = wool,
+    values_from = breaks,
+    values_fn = ~ mean(.x, na.rm = TRUE)
   )
 }
 \seealso{

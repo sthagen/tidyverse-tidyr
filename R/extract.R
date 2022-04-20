@@ -14,8 +14,9 @@
 #'   names or column positions).
 #' @param into Names of new variables to create as character vector.
 #'    Use `NA` to omit the variable in the output.
-#' @param regex a regular expression used to extract the desired values.
-#'   There should be one group (defined by `()`) for each element of `into`.
+#' @param regex A string representing a regular expression used to extract the
+#'   desired values. There should be one group (defined by `()`) for each
+#'   element of `into`.
 #' @param remove If `TRUE`, remove input column from output data frame.
 #' @param convert If `TRUE`, will run [type.convert()] with
 #'   `as.is = TRUE` on new columns. This is useful if the component
@@ -34,14 +35,14 @@
 #' df %>% extract(x, c("A", "B"), "([a-d]+)-([a-d]+)")
 extract <- function(data, col, into, regex = "([[:alnum:]]+)",
                     remove = TRUE, convert = FALSE, ...) {
-  ellipsis::check_dots_used()
+  check_dots_used()
   UseMethod("extract")
 }
 #' @export
 extract.data.frame <- function(data, col, into, regex = "([[:alnum:]]+)",
                                remove = TRUE, convert = FALSE, ...) {
-  check_present(col)
-  var <- tidyselect::vars_pull(names(data), !! enquo(col))
+  check_required(col)
+  var <- tidyselect::vars_pull(names(data), !!enquo(col))
   value <- as.character(data[[var]])
 
   new_cols <- str_extract(value, into = into, regex = regex, convert = convert)
@@ -50,6 +51,8 @@ extract.data.frame <- function(data, col, into, regex = "([[:alnum:]]+)",
 }
 
 str_extract <- function(x, into, regex, convert = FALSE) {
+  check_not_stringr_pattern(regex, "regex")
+
   stopifnot(
     is_string(regex),
     is_character(into)
@@ -58,7 +61,7 @@ str_extract <- function(x, into, regex, convert = FALSE) {
   out <- str_match_first(x, regex)
   if (length(out) != length(into)) {
     stop(
-      "`regex` should define ", length(into), " groups; ", ncol(matches), " found.",
+      "`regex` should define ", length(into), " groups; ", length(out), " found.",
       call. = FALSE
     )
   }
@@ -67,7 +70,7 @@ str_extract <- function(x, into, regex, convert = FALSE) {
   if (anyDuplicated(into)) {
     pieces <- split(out, into)
     into <- names(pieces)
-    out <- map(pieces, pmap_chr, paste0, sep = "")
+    out <- map(pieces, pmap_chr, vec_paste0)
   }
 
   into <- as_utf8_character(into)

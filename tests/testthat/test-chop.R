@@ -11,7 +11,7 @@ test_that("can chop multiple columns", {
 
 test_that("chopping no columns returns input", {
   df <- tibble(a1 = 1, a2 = 2, b1 = 1, b2 = 2)
-  expect_equal(chop(df), df)
+  expect_equal(chop(df, c()), df)
 })
 
 test_that("grouping is preserved", {
@@ -20,12 +20,27 @@ test_that("grouping is preserved", {
   expect_equal(dplyr::group_vars(out), "g")
 })
 
-test_that("can chop empty data frame", {
-  df <- tibble(x = integer(), y = integer())
-  expect_identical(chop(df, y), df)
-  expect_identical(chop(df, x), df[2:1])
+test_that("`cols` is required (#1205)", {
+  df <- tibble(x = 1:2)
+  expect_snapshot((expect_error(chop(df))))
 })
 
+test_that("can chop empty data frame (#1206)", {
+  df <- tibble(x = integer(), y = integer())
+
+  expect_identical(
+    chop(df, y),
+    tibble(x = integer(), y = list_of(.ptype = integer()))
+  )
+  expect_identical(
+    chop(df, x),
+    tibble(y = integer(), x = list_of(.ptype = integer()))
+  )
+  expect_identical(
+    chop(df, c(x, y)),
+    tibble(x = list_of(.ptype = integer()), y = list_of(.ptype = integer()))
+  )
+})
 
 # unchop ------------------------------------------------------------------
 
@@ -174,8 +189,40 @@ test_that("ptype overrides list-of ptype", {
   )
 })
 
-test_that("the ptype must be a list", {
-  expect_error(unchop(mtcars, mpg, ptype = 1), "`ptype` must be a list")
+test_that("ptype is utilized on non-list columns (#1211)", {
+  df <- tibble(x = 1)
+
+  expect_identical(
+    unchop(df, x, ptype = list(x = integer())),
+    tibble(x = 1L)
+  )
+})
+
+test_that("`ptype` is allowed to be an empty ptype (#1284)", {
+  df <- tibble(x = list(1), y = list(1))
+
+  expect_identical(
+    unchop(df, c(x, y), ptype = integer()),
+    tibble(x = 1L, y = 1L)
+  )
+})
+
+test_that("data frame ptype works", {
+  df <- tibble(x = tibble(a = 1))
+
+  expect_identical(
+    unchop(df, x, ptype = tibble(a = integer())),
+    tibble(x = tibble(a = 1L))
+  )
+})
+
+test_that("`ptype = list()` uses list ptype", {
+  df <- tibble(x = list(list(1)))
+
+  expect_identical(
+    unchop(df, x, ptype = list()),
+    tibble(x = list(1))
+  )
 })
 
 test_that("unchopping a bare empty list results in unspecified()", {
@@ -230,7 +277,7 @@ test_that("unchop works with record columns (treating them like vectors)", {
 
 test_that("incompatible sizes are caught", {
   df <- tibble(x = list(1:2), y = list(1:3))
-  expect_snapshot(error = TRUE, unchop(df, c(x, y)))
+  expect_snapshot((expect_error(unchop(df, c(x, y)))))
 })
 
 test_that("empty typed inputs are considered in common size, but NULLs aren't", {
@@ -238,7 +285,7 @@ test_that("empty typed inputs are considered in common size, but NULLs aren't", 
   expect_error(unchop(df, c(x, y)), NA)
 
   df <- tibble(x = list(integer()), y = list(1:2))
-  expect_snapshot(error = TRUE, unchop(df, c(x, y)))
+  expect_snapshot((expect_error(unchop(df, c(x, y)))))
 })
 
 test_that("unchopping retains inner names from tibble elements", {

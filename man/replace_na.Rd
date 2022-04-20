@@ -9,20 +9,19 @@ replace_na(data, replace, ...)
 \arguments{
 \item{data}{A data frame or vector.}
 
-\item{replace}{If \code{data} is a data frame, \code{replace} takes a list of values,
-with one value for each column that has \code{NA} values to be replaced.
+\item{replace}{If \code{data} is a data frame, \code{replace} takes a named list of
+values, with one value for each column that has missing values to be
+replaced. Each value in \code{replace} will be cast to the type of the column
+in \code{data} that it being used as a replacement in.
 
 If \code{data} is a vector, \code{replace} takes a single value. This single value
-replaces all of the \code{NA} values in the vector.}
+replaces all of the missing values in the vector. \code{replace} will be cast
+to the type of \code{data}.}
 
 \item{...}{Additional arguments for methods. Currently unused.}
 }
 \value{
-\itemize{
-\item If \code{data} is a data frame, \code{replace_na()} returns a data frame.
-\item If \code{data} is a vector, \code{replace_na()} returns a vector, with class
-given by the union of \code{data} and \code{replace}.
-}
+\code{replace_na()} returns an object with the same type as \code{data}.
 }
 \description{
 Replace NAs with specified values

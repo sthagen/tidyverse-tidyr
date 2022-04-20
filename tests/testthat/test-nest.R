@@ -48,6 +48,12 @@ test_that("can strip names", {
   expect_named(out$y[[1]], c("a", "b"))
 })
 
+test_that("`.names_sep` is passed through with bare data.frames (#1174)", {
+  df <- data.frame(x = c(1, 1, 1), ya = 1:3, yb = 4:6)
+  out <- nest(df, y = starts_with("y"), .names_sep = "")
+  expect_named(out$y[[1]], c("a", "b"))
+})
+
 test_that("empty factor levels don't affect nest", {
   df <- tibble(
     x = factor(c("z", "a"), levels = letters),
@@ -88,7 +94,7 @@ test_that("can nest multiple columns", {
 test_that("nesting no columns nests all inputs", {
   # included only for backward compatibility
   df <- tibble(a1 = 1, a2 = 2, b1 = 1, b2 = 2)
-  expect_warning(out <- nest(df), "must not be empty")
+  expect_snapshot(out <- nest(df))
   expect_named(out, "data")
   expect_equal(out$data[[1]], df)
 })
@@ -119,7 +125,7 @@ test_that("empty rows still affect output type", {
 
 test_that("bad inputs generate errors", {
   df <- tibble(x = 1, y = list(mean))
-  expect_snapshot(error = TRUE, unnest(df, y))
+  expect_snapshot((expect_error(unnest(df, y))))
 })
 
 test_that("unesting combines augmented vectors", {
@@ -158,7 +164,7 @@ test_that("can unnest mixture of name and unnamed lists of same length", {
   )
   expect_identical(
     unnest(df, c(y, z)),
-    tibble(x = c("a","a"), y = c(1:2), z = c(1:2))
+    tibble(x = c("a", "a"), y = c(1:2), z = c(1:2))
   )
 })
 
@@ -193,10 +199,10 @@ test_that("vectors become columns", {
 
 test_that("multiple columns must be same length", {
   df <- tibble(x = list(1:2), y = list(1:3))
-  expect_snapshot(error = TRUE, unnest(df, c(x, y)))
+  expect_snapshot((expect_error(unnest(df, c(x, y)))))
 
   df <- tibble(x = list(1:2), y = list(tibble(y = 1:3)))
-  expect_snapshot(error = TRUE, unnest(df, c(x, y)))
+  expect_snapshot((expect_error(unnest(df, c(x, y)))))
 })
 
 test_that("can use non-syntactic names", {
@@ -211,7 +217,7 @@ test_that("unpacks df-cols (#1112)", {
 
 test_that("unnesting column of mixed vector / data frame input is an error", {
   df <- tibble(x = list(1, tibble(a = 1)))
-  expect_snapshot(error = TRUE, unnest(df, x))
+  expect_snapshot((expect_error(unnest(df, x))))
 })
 
 # other methods -----------------------------------------------------------------
@@ -260,6 +266,35 @@ test_that("unnesting typed lists of NULLs retains ptype", {
   expect_identical(out, tibble(x = integer(), a = integer()))
 })
 
+test_that("ptype can be overriden manually (#1158)", {
+  df <- tibble(
+    a = list("a", c("b", "c")),
+    b = list(1, c(2, 3)),
+  )
+
+  ptype <- list(b = integer())
+
+  out <- unnest(df, c(a, b), ptype = ptype)
+
+  expect_type(out$b, "integer")
+  expect_identical(out$b, c(1L, 2L, 3L))
+})
+
+test_that("ptype works with nested data frames", {
+  df <- tibble(
+    a = list("a", "b"),
+    b = list(tibble(x = 1, y = 2L), tibble(x = 2, y = 3L)),
+  )
+
+  # x: double -> integer
+  ptype <- list(b = tibble(x = integer(), y = integer()))
+
+  out <- unnest(df, c(a, b), ptype = ptype)
+
+  expect_identical(out$x, c(1L, 2L))
+  expect_identical(out$y, c(2L, 3L))
+})
+
 test_that("skips over vector columns", {
   df <- tibble(x = integer(), y = list())
   expect_identical(unnest(df, x), df)
@@ -276,61 +311,82 @@ test_that("unnest keeps list cols", {
 
 test_that("warn about old style interface", {
   df <- tibble(x = c(1, 1, 1), y = 1:3)
-  expect_warning(out <- nest(df, y), "data = c(y)", fixed = TRUE)
+
+  expect_snapshot(out <- nest(df, y))
   expect_named(out, c("x", "data"))
+
+  expect_snapshot(out <- nest(df, -y))
+  expect_named(out, c("y", "data"))
+})
+
+test_that("only warn about unnamed inputs (#1175)", {
+  df <- tibble(x = 1:3, y = 1:3, z = 1:3)
+  expect_snapshot(out <- nest(df, x, y, foo = z))
+  expect_named(out, c("foo", "data"))
+})
+
+test_that("unnamed expressions are kept in the warning", {
+  df <- tibble(x = 1:3, z = 1:3)
+  expect_snapshot(out <- nest(df, x, starts_with("z")))
+  expect_named(out, "data")
 })
 
 test_that("can control output column name", {
   df <- tibble(x = c(1, 1, 1), y = 1:3)
-  expect_warning(out <- nest(df, y, .key = "y"), "y = c(y)", fixed = TRUE)
+  expect_snapshot(out <- nest(df, y, .key = "y"))
   expect_named(out, c("x", "y"))
 })
 
 test_that("can control output column name when nested", {
   df <- dplyr::group_by(tibble(x = c(1, 1, 1), y = 1:3), x)
-  expect_warning(out <- nest(df, .key = "y"), "`.key`", fixed = TRUE)
+  expect_snapshot(out <- nest(df, .key = "y"))
   expect_named(out, c("x", "y"))
 })
 
 test_that(".key gets warning with new interface", {
   df <- tibble(x = c(1, 1, 1), y = 1:3)
-  expect_warning(out <- nest(df, y = y, .key = "y"), ".key", fixed = TRUE)
+  expect_snapshot(out <- nest(df, y = y, .key = "y"))
   expect_named(df, c("x", "y"))
 })
 
 test_that("cols must go in cols", {
   df <- tibble(x = list(3, 4), y = list("a", "b"))
-  expect_warning(unnest(df, x, y), "c(x, y)", fixed = TRUE)
+  expect_snapshot(unnest(df, x, y))
 })
 
 test_that("need supply column names", {
   df <- tibble(x = 1:2, y = list("a", "b"))
-  expect_warning(unnest(df), "c(y)", fixed = TRUE)
+  expect_snapshot(unnest(df))
 })
 
 test_that("sep combines column names", {
+  local_options(lifecycle_verbosity = "warning")
   df <- tibble(x = list(tibble(x = 1)), y = list(tibble(x = 1)))
-  out <- expect_warning(df %>% unnest(c(x, y), .sep = "_"), "names_sep")
+  expect_snapshot(out <- df %>% unnest(c(x, y), .sep = "_"))
   expect_named(out, c("x_x", "y_x"))
 })
 
 test_that("unnest has mutate semantics", {
   df <- tibble(x = 1:3, y = list(1, 2:3, 4))
-  out <- expect_warning(df %>% unnest(z = map(y, `+`, 1)), "mutate")
+  expect_snapshot(out <- df %>% unnest(z = map(y, `+`, 1)))
   expect_equal(out$z, 2:5)
 })
 
 test_that(".drop and .preserve are deprecated", {
-  df <- tibble(x = list(3, 4), y = list("a", "b"))
-  expect_warning(df %>% unnest(x, .preserve = y), ".preserve")
+  local_options(lifecycle_verbosity = "warning")
 
   df <- tibble(x = list(3, 4), y = list("a", "b"))
-  expect_warning(df %>% unnest(x, .drop = FALSE), ".drop")
+  expect_snapshot(df %>% unnest(x, .preserve = y))
+
+  df <- tibble(x = list(3, 4), y = list("a", "b"))
+  expect_snapshot(df %>% unnest(x, .drop = FALSE))
 })
 
 test_that(".id creates vector of names for vector unnest", {
+  local_options(lifecycle_verbosity = "warning")
+
   df <- tibble(x = 1:2, y = list(a = 1, b = 1:2))
-  out <- expect_warning(unnest(df, y, .id = "name"), "names")
+  expect_snapshot(out <- unnest(df, y, .id = "name"))
 
   expect_equal(out$name, c("a", "b", "b"))
 })

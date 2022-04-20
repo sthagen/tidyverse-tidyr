@@ -1,7 +1,6 @@
 url: https://tidyr.tidyverse.org
 
 home:
-  strip_header: true
   links:
     - text: Learn more
       href: https://r4ds.had.co.nz/tidy-data.html
@@ -14,8 +13,11 @@ navbar:
       href: articles/tidy-data.html
 
 template:
+  bootstrap: 5
   package: tidytemplate
-
+  includes:
+      in_header: |
+        <script defer data-domain="tidyr.tidyverse.org,all.tidyverse.org" src="https://plausible.io/js/plausible.js"></script>
 development:
   mode: auto
 
@@ -28,8 +30,6 @@ reference:
   contents:
   - pivot_longer
   - pivot_wider
-  - spread
-  - gather
 
 - title: Rectangling
   description: |
@@ -45,7 +45,6 @@ reference:
     See `vignette("nest")` for more details and examples.
   contents:
   - nest
-  - nest_legacy
 
 - title: Character vectors
   description: |
@@ -79,14 +78,25 @@ reference:
 - title: Data
   contents:
   - billboard
+  - cms_patient_experience
   - construction
   - fish_encounters
+  - household
   - relig_income
   - smiths
   - table1
   - us_rent_income
   - who
   - world_bank_pop
+
+- title: Superseded
+  description: |
+    Functions that are still supported but no longer receive active
+    development, as better solutions now exist.
+  contents:
+  - spread
+  - gather
+  - nest_legacy
 
 articles:
 - title: Tidying tools
@@ -107,6 +117,8 @@ articles:
 
 news:
   releases:
+  - text: "Version 1.2.0"
+    href: https://www.tidyverse.org/blog/2022/02/tidyr-1-2-0/
   - text: "Version 1.1.0"
     href: https://www.tidyverse.org/blog/2020/05/tidyr-1.1.0/
   - text: "Version 1.0.0"

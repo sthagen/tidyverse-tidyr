@@ -1,8 +1,6 @@
 #' Pack and unpack
 #'
 #' @description
-#' `r lifecycle::badge("maturing")`
-#'
 #' Packing and unpacking preserve the length of a data frame, changing its
 #' width. `pack()` makes `df` narrow by collapsing a set of columns into a
 #' single df-column. `unpack()` makes `data` wider by expanding df-columns
@@ -20,12 +18,12 @@
 #'   as is. In `pack()`, inner names will come from the former outer names;
 #'   in `unpack()`, the new outer names will come from the inner names.
 #'
-#'   If a string, the inner and outer names will be used together. In `pack()`,
-#'   the names of the new outer columns will be formed by pasting together the
-#'   outer and the inner column names, separated by `names_sep`. In `unpack()`,
-#'   the new inner names will have the outer names (+ `names_sep`) automatically
-#'   stripped. This makes `names_sep` roughly symmetric between packing
-#'   and unpacking.
+#'   If a string, the inner and outer names will be used together. In
+#'   `unpack()`, the names of the new outer columns will be formed by pasting
+#'   together the outer and the inner column names, separated by `names_sep`. In
+#'   `pack()`, the new inner names will have the outer names + `names_sep`
+#'   automatically stripped. This makes `names_sep` roughly symmetric between
+#'   packing and unpacking.
 #' @param ... <[`tidy-select`][tidyr_tidy_select]> Columns to pack, specified
 #'   using name-variable pairs of the form `new_col = c(col1, col2, col3)`.
 #'   The right hand side can be any valid tidy select expression.
@@ -66,15 +64,19 @@ pack <- function(.data, ..., .names_sep = NULL) {
   }
 
   cols <- map(cols, ~ tidyselect::eval_select(.x, .data))
+
+  unpacked <- setdiff(names(.data), unlist(map(cols, names)))
+  unpacked <- .data[unpacked]
+
   packed <- map(cols, ~ .data[.x])
 
   if (!is.null(.names_sep)) {
-    packed <- imap(packed, strip_names, .names_sep)
+    packed <- imap(packed, strip_names, names_sep = .names_sep)
   }
 
-  # TODO: find a different approach that preserves order
-  asis <- setdiff(names(.data), unlist(map(cols, names)))
-  out <- vec_cbind(.data[asis], new_data_frame(packed, n = nrow(.data)))
+  packed <- new_data_frame(packed, n = vec_size(.data))
+
+  out <- vec_cbind(unpacked, packed)
 
   reconstruct_tibble(.data, out)
 }
@@ -95,40 +97,53 @@ pack <- function(.data, ..., .names_sep = NULL) {
 #'   See [vctrs::vec_as_names()] for more details on these terms and the
 #'   strategies used to enforce them.
 unpack <- function(data, cols, names_sep = NULL, names_repair = "check_unique") {
-  check_present(cols)
+  check_required(cols)
   cols <- tidyselect::eval_select(enquo(cols), data)
 
+  size <- vec_size(data)
+
   # Start from first principles to avoid issues in any subclass methods
-  out <- new_data_frame(data, n = vec_size(data))
+  out <- tidyr_new_list(data)
 
-  cols <- map2(out[cols], names(cols), check_unpack, names_sep = names_sep)
+  cols <- out[cols]
+  cols <- cols[map_lgl(cols, is.data.frame)]
 
-  out <- tidyr_col_modify(out, cols)
-  out <- flatten_at(out, names(out) %in% names(cols))
+  cols_names <- names(cols)
 
-  if (has_name(formals(vec_as_names), "repair_arg")) {
-    names(out) <- vec_as_names(names(out), repair = names_repair, repair_arg = "names_repair")
-  } else {
-    names(out) <- vec_as_names(names(out), repair = names_repair)
+  if (!is.null(names_sep)) {
+    out[cols_names] <- map2(
+      cols,
+      cols_names,
+      rename_with_names_sep,
+      names_sep = names_sep
+    )
   }
 
-  out <- as_tibble(out, .name_repair = "minimal")
+  # Signal to tell `df_list()` to unpack
+  names <- names(out)
+  names[names %in% cols_names] <- ""
+  names(out) <- names
+
+  out <- df_list(!!!out, .size = size, .name_repair = "minimal")
+  out <- tibble::new_tibble(out, nrow = size)
+
+  names(out) <- vec_as_names(
+    names = names(out),
+    repair = names_repair,
+    repair_arg = "names_repair"
+  )
+
   reconstruct_tibble(data, out)
 }
 
-check_unpack <- function(x, col, names_sep = NULL) {
-  if (!is.data.frame(x) && !is_empty(x)) {
-    abort(glue("`{col}` must be a data frame column"))
-  }
-
-  if (!is.null(names_sep)) {
-    names(x) <- paste0(col, names_sep, names(x))
-  }
-  x
+rename_with_names_sep <- function(x, outer, names_sep) {
+  inner <- names(x)
+  names <- apply_names_sep(outer, inner, names_sep)
+  set_names(x, names)
 }
 
 strip_names <- function(df, base, names_sep) {
-  base <- paste0(base, names_sep)
+  base <- vec_paste0(base, names_sep)
   names <- names(df)
 
   has_prefix <- regexpr(base, names, fixed = TRUE) == 1L

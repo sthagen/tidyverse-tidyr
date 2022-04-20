@@ -10,8 +10,10 @@ pivot_wider_spec(
   spec,
   names_repair = "check_unique",
   id_cols = NULL,
+  id_expand = FALSE,
   values_fill = NULL,
-  values_fn = NULL
+  values_fn = NULL,
+  unused_fn = NULL
 )
 
 build_wider_spec(
@@ -21,7 +23,9 @@ build_wider_spec(
   names_prefix = "",
   names_sep = "_",
   names_glue = NULL,
-  names_sort = FALSE
+  names_sort = FALSE,
+  names_vary = "fastest",
+  names_expand = FALSE
 )
 }
 \arguments{
@@ -46,22 +50,46 @@ for more options.}
 
 \item{id_cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A set of columns that
 uniquely identifies each observation. Defaults to all columns in \code{data}
-except for the columns specified in \code{names_from} and \code{values_from}.
-Typically used when you have redundant variables, i.e. variables whose
-values are perfectly correlated with existing variables.}
+except for the columns specified in \code{spec$.value} and the columns of the
+\code{spec} that aren't named \code{.name} or \code{.value}. Typically used when you have
+redundant variables, i.e. variables whose values are perfectly correlated
+with existing variables.}
+
+\item{id_expand}{Should the values in the \code{id_cols} columns be expanded by
+\code{\link[=expand]{expand()}} before pivoting? This results in more rows, the output will
+contain a complete expansion of all possible values in \code{id_cols}. Implicit
+factor levels that aren't represented in the data will become explicit.
+Additionally, the row values corresponding to the expanded \code{id_cols} will
+be sorted.}
 
 \item{values_fill}{Optionally, a (scalar) value that specifies what each
 \code{value} should be filled in with when missing.
 
-This can be a named list if you want to apply different aggregations
-to different value columns.}
+This can be a named list if you want to apply different fill values to
+different value columns.}
 
-\item{values_fn}{Optionally, a function applied to the \code{value} in each cell
+\item{values_fn}{Optionally, a function applied to the value in each cell
 in the output. You will typically use this when the combination of
-\code{id_cols} and \code{value} column does not uniquely identify an observation.
+\code{id_cols} and \code{names_from} columns does not uniquely identify an
+observation.
 
 This can be a named list if you want to apply different aggregations
-to different value columns.}
+to different \code{values_from} columns.}
+
+\item{unused_fn}{Optionally, a function applied to summarize the values from
+the unused columns (i.e. columns not identified by \code{id_cols},
+\code{names_from}, or \code{values_from}).
+
+The default drops all unused columns from the result.
+
+This can be a named list if you want to apply different aggregations
+to different unused columns.
+
+\code{id_cols} must be supplied for \code{unused_fn} to be useful, since otherwise
+all unspecified columns will be considered \code{id_cols}.
+
+This is similar to grouping by the \code{id_cols} then summarizing the
+unused columns using \code{unused_fn}.}
 
 \item{names_from}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A pair of
 arguments describing which column (or columns) to get the name of the
@@ -93,6 +121,23 @@ a glue specification that uses the \code{names_from} columns (and special
 
 \item{names_sort}{Should the column names be sorted? If \code{FALSE}, the default,
 column names are ordered by first appearance.}
+
+\item{names_vary}{When \code{names_from} identifies a column (or columns) with
+multiple unique values, and multiple \code{values_from} columns are provided,
+in what order should the resulting column names be combined?
+\itemize{
+\item \code{"fastest"} varies \code{names_from} values fastest, resulting in a column
+naming scheme of the form: \verb{value1_name1, value1_name2, value2_name1, value2_name2}. This is the default.
+\item \code{"slowest"} varies \code{names_from} values slowest, resulting in a column
+naming scheme of the form: \verb{value1_name1, value2_name1, value1_name2, value2_name2}.
+}}
+
+\item{names_expand}{Should the values in the \code{names_from} columns be expanded
+by \code{\link[=expand]{expand()}} before pivoting? This results in more columns, the output
+will contain column names corresponding to a complete expansion of all
+possible values in \code{names_from}. Implicit factor levels that aren't
+represented in the data will become explicit. Additionally, the column
+names will be sorted, identical to what \code{names_sort} would produce.}
 }
 \description{
 This is a low level interface to pivotting, inspired by the cdata package,
