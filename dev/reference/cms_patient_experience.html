@@ -107,9 +107,9 @@ Virtual Group Public Reporting",
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="va">cms_patient_experience</span>
-
-<span class="va">cms_patient_care</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">cms_patient_experience</span></span>
+<span></span>
+<span><span class="va">cms_patient_care</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -144,8 +144,8 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">cms_patient_experience</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">measure_cd</span>, <span class="va">measure_title</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cms_patient_experience</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">measure_cd</span>, <span class="va">measure_title</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   measure_cd   measure_title                                              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                                      </span>
@@ -155,13 +155,13 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> CAHPS_GRP_5  CAHPS for MIPS SSM: Health Promotion and Education         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> CAHPS_GRP_8  CAHPS for MIPS SSM: Courteous and Helpful Office Staff     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> CAHPS_GRP_12 CAHPS for MIPS SSM: Stewardship of Patient Resources       </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">cms_patient_experience</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
-<span class="r-in">    id_cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"org"</span><span class="op">)</span>,</span>
-<span class="r-in">    names_from <span class="op">=</span> <span class="va">measure_cd</span>,</span>
-<span class="r-in">    values_from <span class="op">=</span> <span class="va">prf_rate</span></span>
-<span class="r-in"> <span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">cms_patient_experience</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    id_cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"org"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    names_from <span class="op">=</span> <span class="va">measure_cd</span>,</span></span>
+<span class="r-in"><span>    values_from <span class="op">=</span> <span class="va">prf_rate</span></span></span>
+<span class="r-in"><span> <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 95 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    org_pac_id org_nm       CAHPS_GRP_1 CAHPS_GRP_2 CAHPS_GRP_3 CAHPS_GRP_5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -177,12 +177,12 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 1254237779 OUR LADY OF…          61          <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>          65</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 85 more rows, and 2 more variables: CAHPS_GRP_8 &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   CAHPS_GRP_12 &lt;dbl&gt;</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
-<span class="r-in">    names_from <span class="op">=</span> <span class="va">type</span>,</span>
-<span class="r-in">    values_from <span class="op">=</span> <span class="va">score</span></span>
-<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    names_from <span class="op">=</span> <span class="va">type</span>,</span></span>
+<span class="r-in"><span>    values_from <span class="op">=</span> <span class="va">score</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 126 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ccn    facility_name                  measure_abbr denominator observed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -197,12 +197,12 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 011500 BAPTIST HOSPICE                visits_immi…         232     96.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 011501 SOUTHERNCARE NEW BEACON N. BI… beliefs_add…         525    100  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 116 more rows</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
-<span class="r-in">    names_from <span class="op">=</span> <span class="va">measure_abbr</span>,</span>
-<span class="r-in">    values_from <span class="op">=</span> <span class="va">score</span></span>
-<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    names_from <span class="op">=</span> <span class="va">measure_abbr</span>,</span></span>
+<span class="r-in"><span>    values_from <span class="op">=</span> <span class="va">score</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 28 × 12</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ccn    facility_name            type  beliefs_address… composite_proce…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -219,12 +219,12 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 18 more rows, and 7 more variables: dyspena_treatment &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   dyspnea_screening &lt;dbl&gt;, opioid_bowel &lt;dbl&gt;, pain_assessment &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   pain_screening &lt;dbl&gt;, treat_pref &lt;dbl&gt;, visits_imminent &lt;dbl&gt;</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
-<span class="r-in">    names_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">measure_abbr</span>, <span class="va">type</span><span class="op">)</span>,</span>
-<span class="r-in">    values_from <span class="op">=</span> <span class="va">score</span></span>
-<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">cms_patient_care</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    names_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">measure_abbr</span>, <span class="va">type</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    values_from <span class="op">=</span> <span class="va">score</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 14 × 20</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ccn    facility_name beliefs_address… beliefs_address… composite_proce…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -262,7 +262,7 @@ the maximum possible value of the raw score ("denominator")</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
   </div></footer></body></html>

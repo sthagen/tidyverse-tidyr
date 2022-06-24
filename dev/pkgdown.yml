@@ -1,5 +1,5 @@
 pandoc: 2.14.2
-pkgdown: 2.0.4
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   in-packages: in-packages.html
@@ -8,7 +8,7 @@ articles:
   programming: programming.html
   rectangle: rectangle.html
   tidy-data: tidy-data.html
-last_built: 2022-06-21T20:44Z
+last_built: 2022-06-24T23:44Z
 urls:
   reference: https://tidyr.tidyverse.org/reference
   article: https://tidyr.tidyverse.org/articles

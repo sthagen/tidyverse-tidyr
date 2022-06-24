@@ -116,67 +116,67 @@ argument. See <code><a href="https://dplyr.tidyverse.org/articles/programming.ht
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">complete_</span><span class="op">(</span><span class="va">data</span>, <span class="va">cols</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">drop_na_</span><span class="op">(</span><span class="va">data</span>, <span class="va">vars</span><span class="op">)</span>
-
-<span class="fu">expand_</span><span class="op">(</span><span class="va">data</span>, <span class="va">dots</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">crossing_</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-
-<span class="fu">nesting_</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-
-<span class="fu">extract_</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">col</span>,
-  <span class="va">into</span>,
-  regex <span class="op">=</span> <span class="st">"([[:alnum:]]+)"</span>,
-  remove <span class="op">=</span> <span class="cn">TRUE</span>,
-  convert <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">fill_</span><span class="op">(</span><span class="va">data</span>, <span class="va">fill_cols</span>, .direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"down"</span>, <span class="st">"up"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">gather_</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">key_col</span>,
-  <span class="va">value_col</span>,
-  <span class="va">gather_cols</span>,
-  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,
-  convert <span class="op">=</span> <span class="cn">FALSE</span>,
-  factor_key <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">nest_</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
-
-<span class="fu">separate_rows_</span><span class="op">(</span><span class="va">data</span>, <span class="va">cols</span>, sep <span class="op">=</span> <span class="st">"[^[:alnum:].]+"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">separate_</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">col</span>,
-  <span class="va">into</span>,
-  sep <span class="op">=</span> <span class="st">"[^[:alnum:]]+"</span>,
-  remove <span class="op">=</span> <span class="cn">TRUE</span>,
-  convert <span class="op">=</span> <span class="cn">FALSE</span>,
-  extra <span class="op">=</span> <span class="st">"warn"</span>,
-  fill <span class="op">=</span> <span class="st">"warn"</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">spread_</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">key_col</span>,
-  <span class="va">value_col</span>,
-  fill <span class="op">=</span> <span class="cn">NA</span>,
-  convert <span class="op">=</span> <span class="cn">FALSE</span>,
-  drop <span class="op">=</span> <span class="cn">TRUE</span>,
-  sep <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="fu">unite_</span><span class="op">(</span><span class="va">data</span>, <span class="va">col</span>, <span class="va">from</span>, sep <span class="op">=</span> <span class="st">"_"</span>, remove <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="fu">unnest_</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">complete_</span><span class="op">(</span><span class="va">data</span>, <span class="va">cols</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">drop_na_</span><span class="op">(</span><span class="va">data</span>, <span class="va">vars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">expand_</span><span class="op">(</span><span class="va">data</span>, <span class="va">dots</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">crossing_</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">nesting_</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">extract_</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">col</span>,</span>
+<span>  <span class="va">into</span>,</span>
+<span>  regex <span class="op">=</span> <span class="st">"([[:alnum:]]+)"</span>,</span>
+<span>  remove <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  convert <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">fill_</span><span class="op">(</span><span class="va">data</span>, <span class="va">fill_cols</span>, .direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"down"</span>, <span class="st">"up"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">gather_</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">key_col</span>,</span>
+<span>  <span class="va">value_col</span>,</span>
+<span>  <span class="va">gather_cols</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  convert <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  factor_key <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">nest_</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">separate_rows_</span><span class="op">(</span><span class="va">data</span>, <span class="va">cols</span>, sep <span class="op">=</span> <span class="st">"[^[:alnum:].]+"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">separate_</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">col</span>,</span>
+<span>  <span class="va">into</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">"[^[:alnum:]]+"</span>,</span>
+<span>  remove <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  convert <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  extra <span class="op">=</span> <span class="st">"warn"</span>,</span>
+<span>  fill <span class="op">=</span> <span class="st">"warn"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">spread_</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">key_col</span>,</span>
+<span>  <span class="va">value_col</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  convert <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  drop <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sep <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">unite_</span><span class="op">(</span><span class="va">data</span>, <span class="va">col</span>, <span class="va">from</span>, sep <span class="op">=</span> <span class="st">"_"</span>, remove <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">unnest_</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -270,8 +270,7 @@ which preserves the original ordering of the columns.</p></dd>
 
 
 <dt>sep</dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>:
-use <code>names_sep</code> instead.</p></dd>
+<dd><p>Separator delimiting collapsed values.</p></dd>
 
 
 <dt>extra</dt>
@@ -307,7 +306,7 @@ data, filling in missing combinations with <code>fill</code>.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
   </div></footer></body></html>
