@@ -1,5 +1,19 @@
 # tidyr (development version)
 
+* New family of consistent string separating functions:
+  `separate_wider_delim()`, `separate_wider_position()`, `separate_wider_regex()`, 
+  `separate_longer_delim()`, and `separate_longer_position()`. These functions
+  are thorough refreshes of `separate()` and `extract()`, featuring improved
+  performance, greater consistency, a polished API, and a new approach for
+  handling problems. They use stringr and supersede `extract()`, `separate()`, 
+  and `separate_rows()` (#1304).
+
+* `pivot_longer(values_drop_na = TRUE)` is faster when there aren't any missing
+  values to drop (#1392, @mgirlich).
+
+* `replace_na()` is faster when there aren't any missing values to replace
+  (#1392, @mgirlich).
+
 * tidyr errors (including input validation) have been thorougly reviewed
   and should generally be more likely to point you in the right direction 
   (#1313, #1400).
