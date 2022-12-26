@@ -182,7 +182,15 @@ list_of_ptype <- function(x) {
 }
 
 apply_names_sep <- function(outer, inner, names_sep) {
-  as.character(glue("{outer}{names_sep}{inner}"))
+  # Need to avoid `paste0()` recycling issue. Not using `vec_paste0()`
+  # because that is too slow to be applied to each element (#1427).
+  # `outer` and `names_sep` are required to be length 1,
+  # so we only need to check `inner`.
+  if (length(inner) == 0L) {
+    character()
+  } else {
+    paste0(outer, names_sep, inner)
+  }
 }
 
 vec_paste0 <- function(...) {
@@ -238,7 +246,10 @@ check_list_of_functions <- function(x, names, arg = caller_arg(x), call = caller
 
   check_unique_names(x, arg = arg, call = call)
 
-  x <- map(x, as_function, arg = arg, call = call)
+  x <- lapply(set_names(seq_along(x), names(x)), function(i) {
+    as_function(x[[i]], arg = glue("{arg}[[{i}]]"), call = call)
+  })
+
   # Silently drop user supplied names not found in the data
   x <- x[intersect(names(x), names)]
 
