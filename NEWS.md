@@ -1,5 +1,17 @@
 # tidyr (development version)
 
+* `nest()`, `complete()`, `expand()`, and `fill()` now document their support
+  for grouped data frames created by `dplyr::group_by()` (#952).
+
+* `pivot_longer_spec()`, `pivot_wider_spec()`, `build_longer_spec()`, and
+  `build_wider_spec()` have all gained an `error_call` argument, resulting in
+  better error reporting in `pivot_longer()` and `pivot_wider()` (#1408).
+
+* `pivot_longer()` no longer supports interpreting `values_ptypes = list()`
+  and `names_ptypes = list()` as `NULL`. An empty `list()` is now interpreted as
+  a `<list>` prototype to apply to all columns, which is consistent with how any
+  other 0-length value is interpreted (#1296).
+
 * All functions deprecated in tidyr 1.0 and 1.2 (the old lazyeval functions 
   ending in `_` and various arguments to `unnest()`) now warn on every use.
   They will be made defunct in 2024 (#1406).

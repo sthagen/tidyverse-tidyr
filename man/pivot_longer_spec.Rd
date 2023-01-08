@@ -13,7 +13,8 @@ pivot_longer_spec(
   names_repair = "check_unique",
   values_drop_na = FALSE,
   values_ptypes = NULL,
-  values_transform = NULL
+  values_transform = NULL,
+  error_call = current_env()
 )
 
 build_longer_spec(
@@ -26,7 +27,8 @@ build_longer_spec(
   names_sep = NULL,
   names_pattern = NULL,
   names_ptypes = NULL,
-  names_transform = NULL
+  names_transform = NULL,
+  error_call = current_env()
 )
 }
 \arguments{
@@ -67,6 +69,11 @@ for more options.}
 in the \code{value_to} column. This effectively converts explicit missing values
 to implicit missing values, and should generally be used only when missing
 values in \code{data} were created by its structure.}
+
+\item{error_call}{The execution environment of a currently
+running function, e.g. \code{caller_env()}. The function will be
+mentioned in error messages as the source of the error. See the
+\code{call} argument of \code{\link[rlang:abort]{abort()}} for more information.}
 
 \item{cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Columns to pivot into
 longer format.}
@@ -120,11 +127,7 @@ zero-length vector (like \code{integer()} or \code{numeric()}) that defines the 
 class, and attributes of a vector. Use these arguments if you want to
 confirm that the created columns are the types that you expect. Note that
 if you want to change (instead of confirm) the types of specific columns,
-you should use \code{names_transform} or \code{values_transform} instead.
-
-For backwards compatibility reasons, supplying \code{list()} is interpreted as
-being identical to \code{NULL} rather than as using a list prototype on all
-columns. Expect this to change in the future.}
+you should use \code{names_transform} or \code{values_transform} instead.}
 
 \item{names_transform, values_transform}{Optionally, a list of column
 name-function pairs. Alternatively, a single function can be supplied,
