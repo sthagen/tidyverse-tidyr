@@ -7,50 +7,85 @@
       Error in `unnest_wider()`:
       ! List-column `y` must contain only vectors.
 
-# can unnest a vector with a mix of named/unnamed elements (#1200 comment)
+# can't unnest unnamed elements without `names_sep` (#1367)
 
     Code
-      out <- unnest_wider(df, x, names_sep = "_")
-    Message
-      New names:
-      * `` -> `...1`
-
-# unique name repair is done on the elements before applying `names_sep` (#1200 comment)
-
-    Code
-      out <- unnest_wider(df, col, names_sep = "_")
-    Message
-      New names:
-      * `` -> `...1`
+      unnest_wider(df, col)
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't unnest elements with missing names.
+      i Supply `names_sep` to generate automatic names.
 
 ---
 
     Code
-      out <- unnest_wider(df, col, names_sep = "_")
-    Message
-      New names:
-      * `` -> `...1`
-      * `` -> `...2`
-
-# output structure is the same whether or not `names_sep` is applied (#1200 comment)
-
-    Code
-      out1 <- unnest_wider(df, col)
-    Message
-      New names:
-      * `` -> `...1`
-      New names:
-      * `` -> `...1`
+      unnest_wider(df, col)
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't unnest elements with missing names.
+      i Supply `names_sep` to generate automatic names.
 
 ---
 
     Code
-      out2 <- unnest_wider(df, col, names_sep = "_")
+      unnest_wider(df, col)
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't unnest elements with missing names.
+      i Supply `names_sep` to generate automatic names.
+
+---
+
+    Code
+      unnest_wider(df, col)
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't unnest elements with missing names.
+      i Supply `names_sep` to generate automatic names.
+
+# catches duplicate inner names in the same vector
+
+    Code
+      unnest_wider(df, col)
+    Condition
+      Error in `unnest_wider()`:
+      ! Names must be unique.
+      x These names are duplicated:
+        * "a" at locations 1 and 2.
+      i Use argument `names_repair` to specify repair strategy.
+
+---
+
+    Code
+      out <- unnest_wider(df, col, names_repair = "unique")
     Message
       New names:
-      * `` -> `...1`
-      New names:
-      * `` -> `...1`
+      * `a` -> `a...1`
+      * `a` -> `a...2`
+
+# unnest_wider() advises on outer / inner name duplication (#1367)
+
+    Code
+      unnest_wider(df, y)
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't duplicate names between the affected columns and the original data.
+      x These names are duplicated:
+        i `x`, from `y`.
+      i Use `names_sep` to disambiguate using the column name.
+      i Or use `names_repair` to specify a repair strategy.
+
+# unnest_wider() advises on inner / inner name duplication (#1367)
+
+    Code
+      unnest_wider(df, c(y, z))
+    Condition
+      Error in `unnest_wider()`:
+      ! Can't duplicate names within the affected columns.
+      x These names are duplicated:
+        i `a`, within `y` and `z`.
+      i Use `names_sep` to disambiguate using the column name.
+      i Or use `names_repair` to specify a repair strategy.
 
 # unnest_wider() validates its inputs
 

@@ -39,54 +39,6 @@ Run `cloud_details(, "faux")` for more info
     Execution halted
     ```
 
-# GauPro
-
-<details>
-
-* Version: 0.2.6
-* GitHub: https://github.com/CollinErickson/GauPro
-* Source code: https://github.com/cran/GauPro
-* Date/Publication: 2022-11-24 08:40:02 UTC
-* Number of recursive dependencies: 79
-
-Run `cloud_details(, "GauPro")` for more info
-
-</details>
-
-## Newly broken
-
-*   checking tests ... ERROR
-    ```
-      Running ‘testthat.R’
-    Running the tests in ‘tests/testthat.R’ failed.
-    Last 13 lines of output:
-      > library(GauPro)
-      > 
-      > test_check("GauPro")
-      [ FAIL 1 | WARN 0 | SKIP 0 | PASS 1337 ]
-      
-      ══ Failed tests ════════════════════════════════════════════════════════════════
-      ── Failure ('test_kernel_model_and_kernels.R:204'): kernels work and have correct grads ──
-      White numgrad matches symbolic grad (failed on all 10 attempts) is not TRUE
-      
-      `actual` is a character vector ('Mean relative difference: 0.0003611384')
-      `expected` is a logical vector (TRUE)
-      
-      [ FAIL 1 | WARN 0 | SKIP 0 | PASS 1337 ]
-      Error: Test failures
-      Execution halted
-    ```
-
-## In both
-
-*   checking installed package size ... NOTE
-    ```
-      installed size is 15.0Mb
-      sub-directories of 1Mb or more:
-        R      1.1Mb
-        libs  13.3Mb
-    ```
-
 # ggpubr
 
 <details>
@@ -126,6 +78,93 @@ Run `cloud_details(, "ggpubr")` for more info
      13.           └─cli::cli_abort(...)
      14.             └─rlang::abort(...)
     Execution halted
+    ```
+
+# gutenbergr
+
+<details>
+
+* Version: 0.2.3
+* GitHub: https://github.com/ropensci/gutenbergr
+* Source code: https://github.com/cran/gutenbergr
+* Date/Publication: 2022-12-14 10:00:06 UTC
+* Number of recursive dependencies: 88
+
+Run `cloud_details(, "gutenbergr")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking examples ... ERROR
+    ```
+    Running examples in ‘gutenbergr-Ex.R’ failed
+    The error most likely occurred in:
+    
+    > ### Name: gutenberg_get_mirror
+    > ### Title: Get the recommended mirror for Gutenberg files
+    > ### Aliases: gutenberg_get_mirror
+    > 
+    > ### ** Examples
+    > 
+    > gutenberg_get_mirror()
+    Determining mirror for Project Gutenberg from https://www.gutenberg.org/robot/harvest
+    Error in open.connection(3L, "rb") : 
+      Timeout was reached: [www.gutenberg.org] Connection timed out after 10001 milliseconds
+    Calls: gutenberg_get_mirror ... <Anonymous> -> vroom_ -> <Anonymous> -> open.connection
+    Execution halted
+    ```
+
+## In both
+
+*   checking installed package size ... NOTE
+    ```
+      installed size is  5.1Mb
+      sub-directories of 1Mb or more:
+        data   4.6Mb
+    ```
+
+*   checking data for non-ASCII characters ... NOTE
+    ```
+      Note: found 18981 marked UTF-8 strings
+    ```
+
+# mapme.biodiversity
+
+<details>
+
+* Version: 0.2.1
+* GitHub: https://github.com/mapme-initiative/mapme.biodiversity
+* Source code: https://github.com/cran/mapme.biodiversity
+* Date/Publication: 2022-09-09 10:12:54 UTC
+* Number of recursive dependencies: 118
+
+Run `cloud_details(, "mapme.biodiversity")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking tests ... ERROR
+    ```
+      Running ‘testthat.R’
+    Running the tests in ‘tests/testthat.R’ failed.
+    Last 13 lines of output:
+       13. │           └─tidyselect:::eval_c(expr, data_mask, context_mask)
+       14. │             └─tidyselect:::reduce_sels(node, data_mask, context_mask, init = init)
+       15. │               └─tidyselect:::walk_data_tree(new, data_mask, context_mask)
+       16. │                 └─tidyselect:::as_indices_sel_impl(...)
+       17. │                   └─tidyselect:::as_indices_impl(...)
+       18. │                     └─tidyselect:::chr_as_locations(x, vars, call = call, arg = arg)
+       19. │                       └─vctrs::vec_as_location(...)
+       20. └─vctrs (local) `<fn>`()
+       21.   └─vctrs:::stop_subscript_oob(...)
+       22.     └─vctrs:::stop_subscript(...)
+       23.       └─rlang::abort(...)
+      
+      [ FAIL 1 | WARN 0 | SKIP 26 | PASS 113 ]
+      Error: Test failures
+      Execution halted
     ```
 
 # metaconfoundr
@@ -209,98 +248,40 @@ Run `cloud_details(, "metaconfoundr")` for more info
     Execution halted
     ```
 
-# openalexR
+# panelr
 
 <details>
 
-* Version: 1.0.0
-* GitHub: https://github.com/massimoaria/openalexR
-* Source code: https://github.com/cran/openalexR
-* Date/Publication: 2022-10-06 10:40:02 UTC
-* Number of recursive dependencies: 78
+* Version: 0.7.6
+* GitHub: https://github.com/jacob-long/panelr
+* Source code: https://github.com/cran/panelr
+* Date/Publication: 2021-12-17 07:40:02 UTC
+* Number of recursive dependencies: 169
 
-Run `cloud_details(, "openalexR")` for more info
+Run `cloud_details(, "panelr")` for more info
 
 </details>
 
 ## Newly broken
-
-*   checking re-building of vignette outputs ... WARNING
-    ```
-    Error(s) in re-building vignettes:
-      ...
-    --- re-building ‘A_Brief_Introduction_to_openalexR.Rmd’ using rmarkdown
-    Quitting from lines 342-354 (A_Brief_Introduction_to_openalexR.Rmd) 
-    Error: processing vignette 'A_Brief_Introduction_to_openalexR.Rmd' failed with diagnostics:
-    missing value where TRUE/FALSE needed
-    --- failed re-building ‘A_Brief_Introduction_to_openalexR.Rmd’
-    
-    SUMMARY: processing the following file failed:
-      ‘A_Brief_Introduction_to_openalexR.Rmd’
-    
-    Error: Vignette re-building failed.
-    Execution halted
-    ```
-
-# recipes
-
-<details>
-
-* Version: 1.0.3
-* GitHub: https://github.com/tidymodels/recipes
-* Source code: https://github.com/cran/recipes
-* Date/Publication: 2022-11-09 16:50:02 UTC
-* Number of recursive dependencies: 134
-
-Run `cloud_details(, "recipes")` for more info
-
-</details>
-
-## Newly broken
-
-*   checking examples ... ERROR
-    ```
-    Running examples in ‘recipes-Ex.R’ failed
-    The error most likely occurred in:
-    
-    > ### Name: step_naomit
-    > ### Title: Remove observations with missing values
-    > ### Aliases: step_naomit
-    > 
-    > ### ** Examples
-    > 
-    > 
-    ...
-     10.       └─tidyselect::eval_select(expr(c(!!!dots)), data, allow_rename = FALSE)
-     11.         └─tidyselect:::eval_select_impl(...)
-     12.           ├─tidyselect:::with_subscript_errors(...)
-     13.           │ └─rlang::try_fetch(...)
-     14.           │   └─base::withCallingHandlers(...)
-     15.           └─tidyselect:::vars_select_eval(...)
-     16.             └─tidyselect:::ensure_named(...)
-     17.               └─cli::cli_abort(...)
-     18.                 └─rlang::abort(...)
-    Execution halted
-    ```
 
 *   checking tests ... ERROR
     ```
       Running ‘testthat.R’
     Running the tests in ‘tests/testthat.R’ failed.
     Last 13 lines of output:
-        9.     ├─tidyr::drop_na(new_data, object$columns)
-       10.     └─tidyr:::drop_na.data.frame(new_data, object$columns)
-       11.       └─tidyselect::eval_select(expr(c(!!!dots)), data, allow_rename = FALSE)
-       12.         └─tidyselect:::eval_select_impl(...)
-       13.           ├─tidyselect:::with_subscript_errors(...)
-       14.           │ └─rlang::try_fetch(...)
-       15.           │   └─base::withCallingHandlers(...)
-       16.           └─tidyselect:::vars_select_eval(...)
-       17.             └─tidyselect:::ensure_named(...)
-       18.               └─cli::cli_abort(...)
-       19.                 └─rlang::abort(...)
+        5.     └─panelr:::detrend(e$data, pf, dt_order, balance_correction, dt_random)
+        6.       ├─tidyr::nest(data)
+        7.       └─tidyr:::nest.grouped_df(data)
+        8.         └─tidyr:::nest.tbl_df(.data, `:=`(!!.key, all_of(cols)), .names_sep = .names_sep)
+        9.           └─vctrs::vec_cbind(out, inner, .name_repair = "check_unique", .error_call = error_call)
+       10.             └─vctrs (local) `<fn>`()
+       11.               └─vctrs:::validate_unique(names = names, arg = arg, call = call)
+       12.                 └─vctrs:::stop_names_must_be_unique(names, arg, call = call)
+       13.                   └─vctrs:::stop_names(...)
+       14.                     └─vctrs:::stop_vctrs(...)
+       15.                       └─rlang::abort(message, class = c(class, "vctrs_error"), ..., call = vctrs_error_call(call))
       
-      [ FAIL 2 | WARN 2 | SKIP 401 | PASS 1889 ]
+      [ FAIL 2 | WARN 1 | SKIP 0 | PASS 240 ]
       Error: Test failures
       Execution halted
     ```
@@ -309,6 +290,152 @@ Run `cloud_details(, "recipes")` for more info
 
 *   checking Rd cross-references ... NOTE
     ```
-    Packages unavailable to check Rd xrefs: ‘fastICA’, ‘dimRed’
+    Package unavailable to check Rd xrefs: ‘AER’
+    ```
+
+# tidypaleo
+
+<details>
+
+* Version: 0.1.2
+* GitHub: https://github.com/paleolimbot/tidypaleo
+* Source code: https://github.com/cran/tidypaleo
+* Date/Publication: 2022-02-24 11:50:02 UTC
+* Number of recursive dependencies: 86
+
+Run `cloud_details(, "tidypaleo")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking examples ... ERROR
+    ```
+    Running examples in ‘tidypaleo-Ex.R’ failed
+    The error most likely occurred in:
+    
+    > ### Name: layer_dendrogram
+    > ### Title: Add a dendrogram as a layer or facet
+    > ### Aliases: layer_dendrogram plot_layer_dendrogram layer_zone_boundaries
+    > 
+    > ### ** Examples
+    > 
+    > library(ggplot2)
+    ...
+     11.           └─tidyselect::eval_select(...)
+     12.             └─tidyselect:::eval_select_impl(...)
+     13.               ├─tidyselect:::with_subscript_errors(...)
+     14.               │ └─rlang::try_fetch(...)
+     15.               │   └─base::withCallingHandlers(...)
+     16.               └─tidyselect:::vars_select_eval(...)
+     17.                 └─tidyselect:::ensure_named(...)
+     18.                   └─cli::cli_abort(...)
+     19.                     └─rlang::abort(...)
+    Execution halted
+    ```
+
+*   checking tests ... ERROR
+    ```
+      Running ‘testthat.R’
+    Running the tests in ‘tests/testthat.R’ failed.
+    Last 13 lines of output:
+        5.       └─base::lapply(...)
+        6.         └─tidyr (local) FUN(X[[i]], ...)
+        7.           └─tidyselect::eval_select(...)
+        8.             └─tidyselect:::eval_select_impl(...)
+        9.               ├─tidyselect:::with_subscript_errors(...)
+       10.               │ └─rlang::try_fetch(...)
+       11.               │   └─base::withCallingHandlers(...)
+       12.               └─tidyselect:::vars_select_eval(...)
+       13.                 └─tidyselect:::ensure_named(...)
+       14.                   └─cli::cli_abort(...)
+       15.                     └─rlang::abort(...)
+      
+      [ FAIL 18 | WARN 1 | SKIP 12 | PASS 134 ]
+      Error: Test failures
+      Execution halted
+    ```
+
+*   checking re-building of vignette outputs ... WARNING
+    ```
+    Error(s) in re-building vignettes:
+      ...
+    --- re-building ‘age_depth.Rmd’ using rmarkdown
+    --- finished re-building ‘age_depth.Rmd’
+    
+    --- re-building ‘nested_analysis.Rmd’ using rmarkdown
+    Quitting from lines 44-53 (nested_analysis.Rmd) 
+    Error: processing vignette 'nested_analysis.Rmd' failed with diagnostics:
+    Can't rename variables in this context.
+    --- failed re-building ‘nested_analysis.Rmd’
+    ...
+    Quitting from lines 250-257 (strat_diagrams.Rmd) 
+    Error: processing vignette 'strat_diagrams.Rmd' failed with diagnostics:
+    Can't rename variables in this context.
+    --- failed re-building ‘strat_diagrams.Rmd’
+    
+    SUMMARY: processing the following files failed:
+      ‘nested_analysis.Rmd’ ‘strat_diagrams.Rmd’
+    
+    Error: Vignette re-building failed.
+    Execution halted
+    ```
+
+# wpa
+
+<details>
+
+* Version: 1.8.0
+* GitHub: https://github.com/microsoft/wpa
+* Source code: https://github.com/cran/wpa
+* Date/Publication: 2022-07-05 15:40:02 UTC
+* Number of recursive dependencies: 121
+
+Run `cloud_details(, "wpa")` for more info
+
+</details>
+
+## Newly broken
+
+*   checking examples ... ERROR
+    ```
+    Running examples in ‘wpa-Ex.R’ failed
+    The error most likely occurred in:
+    
+    > ### Name: workpatterns_classify
+    > ### Title: Classify working pattern personas using a rule based algorithm
+    > ### Aliases: workpatterns_classify
+    > 
+    > ### ** Examples
+    > 
+    > 
+    > # Returns a plot by default
+    > em_data %>% workpatterns_classify(method = "bw")
+    Error in `:=`(Personas, "Unclassified") : 
+      Check that is.data.table(DT) == TRUE. Otherwise, := and `:=`(...) are defined for use in j, once only and in particular ways. See help(":=").
+    Calls: %>% ... workpatterns_classify_bw -> [ -> [.data.frame -> :=
+    Execution halted
+    ```
+
+*   checking tests ... ERROR
+    ```
+      Running ‘testthat.R’
+    Running the tests in ‘tests/testthat.R’ failed.
+    Last 13 lines of output:
+       4.     ├─base::`[.data.frame`(ptn_data_personas, , `:=`(Personas, "Unclassified"))
+       5.     └─`:=`(Personas, "Unclassified")
+      ── Error ('test-workpatterns_classify.R:25'): workpatterns plots returns ggplot object ──
+      Error in ``:=`(Personas, "Unclassified")`: Check that is.data.table(DT) == TRUE. Otherwise, := and `:=`(...) are defined for use in j, once only and in particular ways. See help(":=").
+      Backtrace:
+          ▆
+       1. └─wpa::workpatterns_classify(em_data, signals = "meetings", return = "plot") at test-workpatterns_classify.R:25:2
+       2.   └─wpa:::workpatterns_classify_bw(...)
+       3.     ├─ptn_data_personas[, `:=`(Personas, "Unclassified")]
+       4.     ├─base::`[.data.frame`(ptn_data_personas, , `:=`(Personas, "Unclassified"))
+       5.     └─`:=`(Personas, "Unclassified")
+      
+      [ FAIL 2 | WARN 195 | SKIP 0 | PASS 6 ]
+      Error: Test failures
+      Execution halted
     ```
 

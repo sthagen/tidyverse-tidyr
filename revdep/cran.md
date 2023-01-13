@@ -1,9 +1,9 @@
 ## revdepcheck results
 
-We checked 1733 reverse dependencies (1715 from CRAN + 18 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+We checked 1743 reverse dependencies (1724 from CRAN + 19 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
 
- * We saw 6 new problems
- * We failed to check 11 packages
+ * We saw 8 new problems
+ * We failed to check 15 packages
 
 Issues with CRAN packages are summarised below.
 
@@ -13,34 +13,46 @@ Issues with CRAN packages are summarised below.
 * faux
   checking re-building of vignette outputs ... WARNING
 
-* GauPro
-  checking tests ... ERROR
-
 * ggpubr
   checking examples ... ERROR
+
+* gutenbergr
+  checking examples ... ERROR
+
+* mapme.biodiversity
+  checking tests ... ERROR
 
 * metaconfoundr
   checking examples ... ERROR
   checking tests ... ERROR
   checking re-building of vignette outputs ... WARNING
 
-* openalexR
+* panelr
+  checking tests ... ERROR
+
+* tidypaleo
+  checking examples ... ERROR
+  checking tests ... ERROR
   checking re-building of vignette outputs ... WARNING
 
-* recipes
+* wpa
   checking examples ... ERROR
   checking tests ... ERROR
 
 ### Failed to check
 
-* FAMetA        (NA)
-* genekitr      (NA)
-* ggPMX         (NA)
-* loon.ggplot   (NA)
-* numbat        (NA)
-* OlinkAnalyze  (NA)
-* Platypus      (NA)
-* RVA           (NA)
-* tinyarray     (NA)
-* vivid         (NA)
-* xpose.nlmixr2 (NA)
+* cities         (NA)
+* FAMetA         (NA)
+* genekitr       (NA)
+* ggPMX          (NA)
+* ggsector       (NA)
+* loon.ggplot    (NA)
+* MarketMatching (NA)
+* numbat         (NA)
+* OlinkAnalyze   (NA)
+* Platypus       (NA)
+* RVA            (NA)
+* SCpubr         (NA)
+* tinyarray      (NA)
+* vivid          (NA)
+* xpose.nlmixr2  (NA)
