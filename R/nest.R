@@ -143,10 +143,15 @@ nest <- function(.data,
 
     cols <- c(cols_good, cols_fixed)
 
-    cli::cli_warn(c(
-      "All elements of `...` must be named.",
-      i = "Did you want `{(.key)} = {cols_fixed_label}`?"
-    ))
+    lifecycle::deprecate_warn(
+      when = "1.0.0",
+      what = I("Supplying `...` without names"),
+      details = c(
+        i = "Please specify a name for each selection.",
+        i = cli::format_inline("Did you want `{(.key)} = {cols_fixed_label}`?")
+      ),
+      always = TRUE
+    )
 
     return(nest(.data, !!!cols, .by = {{ .by }}))
   }
@@ -240,14 +245,20 @@ nest_info <- function(.data,
     warn_unused_key(error_call = .error_call)
   }
 
-  cols <- lapply(cols, function(col) {
-    names(tidyselect::eval_select(
-      expr = col,
-      data = .data,
-      allow_rename = FALSE,
-      error_call = .error_call
-    ))
-  })
+  cols <- with_indexed_errors(
+    map(cols, function(col) {
+      names(tidyselect::eval_select(
+        expr = col,
+        data = .data,
+        allow_rename = FALSE,
+        error_call = NULL
+      ))
+    }),
+    message = function(cnd) {
+      cli::format_inline("In expression named {.arg {cnd$name}}:")
+    },
+    .error_call = .error_call
+  )
 
   names <- names(.data)
 
