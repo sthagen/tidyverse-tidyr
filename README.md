@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tidyr <a href='https://tidyr.tidyverse.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
+# tidyr <a href="https://tidyr.tidyverse.org"><img src="man/figures/logo.png" align="right" height="138" alt="tidyr website" /></a>
 
 <!-- badges: start -->
 
@@ -17,7 +17,7 @@ coverage](https://codecov.io/gh/tidyverse/tidyr/branch/main/graph/badge.svg)](ht
 The goal of tidyr is to help you create **tidy data**. Tidy data is data
 where:
 
-1.  Every column is variable.
+1.  Every column is a variable.
 2.  Every row is an observation.
 3.  Every cell is a single value.
 
@@ -37,8 +37,8 @@ install.packages("tidyverse")
 install.packages("tidyr")
 
 # Or the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("tidyverse/tidyr")
+# install.packages("pak")
+pak::pak("tidyverse/tidyr")
 ```
 
 ## Cheatsheet
