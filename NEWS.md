@@ -1,5 +1,7 @@
 # tidyr (development version)
 
+* Fixed an internal error in `pivot_wider()` (#1609, @krlmlr).
+
 * The base pipe is now used throughout the documentation (#1613).
 
 * R >=4.1.0 is now required, in line with the [tidyverse
@@ -24,6 +26,8 @@
   inputs (@catalamarti, #1510).
 
 * tidyr now requires dplyr >=1.1.0 (#1568, @catalamarti).
+
+* `unnest_longer()` now places `indices_to` columns before value columns (#1486, @andrewshibata).
 
 # tidyr 1.3.1
 
